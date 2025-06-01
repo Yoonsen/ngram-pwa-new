@@ -94,12 +94,12 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
     };
 
     const languages = [
-        { code: 'nob', label: 'Bokmål' },
-        { code: 'nno', label: 'Nynorsk' },
-        { code: 'sme', label: 'Northern Sami' },
-        { code: 'sma', label: 'Southern Sami' },
-        { code: 'smj', label: 'Lule Sami' },
-        { code: 'fkv', label: 'Kven' }
+        { code: 'nob', label: 'Bokmål', fullName: 'Norsk bokmål' },
+        { code: 'nno', label: 'Nynorsk', fullName: 'Norsk nynorsk' },
+        { code: 'sme', label: 'Nordsamisk', fullName: 'Davvisámegiella' },
+        { code: 'sma', label: 'Sørsamisk', fullName: 'Åarjelsaemien gïele' },
+        { code: 'smj', label: 'Lulesamisk', fullName: 'Julevsámegiella' },
+        { code: 'fkv', label: 'Kvensk', fullName: 'Kainun kieli' }
     ];
 
     const handleDownload = () => {
@@ -169,6 +169,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                     borderRight: '1px solid #ced4da'
                                 }}
                                 disabled={corpus === 'avis'}
+                                title={languages.find(l => l.code === lang)?.fullName || lang}
                             >
                                 {corpus === 'avis' ? 'nor' : lang}
                             </button>
@@ -182,8 +183,9 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                                 setLang(language.code);
                                                 setShowLangDropdown(false);
                                             }}
+                                            title={language.fullName}
                                     >
-                                            {language.code}
+                                            {language.label}
                                         </button>
                                 ))}
                                 </div>
