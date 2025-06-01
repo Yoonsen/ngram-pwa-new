@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Container, Button, ButtonGroup } from 'react-bootstrap';
+import { Container, Button, ButtonGroup, Modal } from 'react-bootstrap';
 import { Chart, registerables } from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import * as XLSX from 'xlsx';
@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 // Register Chart.js components and zoom plugin
 Chart.register(...registerables, zoomPlugin);
 
-const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capitalization: false, smoothing: 4 } }) => {
+const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capitalization: false, smoothing: 4 }, corpus }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     const [isZoomed, setIsZoomed] = useState(false);
@@ -15,6 +15,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
     const [zoomEnd, setZoomEnd] = useState(null);
     const [lastZoomState, setLastZoomState] = useState(null);
     const [currentZoomState, setCurrentZoomState] = useState(null);
+    const [showSearchModal, setShowSearchModal] = useState(false);
+    const [selectedYear, setSelectedYear] = useState(null);
+    const [selectedWord, setSelectedWord] = useState(null);
 
     const resetZoom = () => {
         if (chartInstance.current) {
@@ -25,6 +28,52 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             setLastZoomState(null);
             setCurrentZoomState(null);
         }
+    };
+
+    const handleChartClick = (event) => {
+        const chart = chartInstance.current;
+        if (!chart) return;
+
+        const elements = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+        if (elements.length === 0) return;
+
+        const element = elements[0];
+        const datasetIndex = element.datasetIndex;
+        const dataIndex = element.index;
+        
+        const year = data.dates[dataIndex];
+        const word = data.series[datasetIndex].name;
+        
+        setSelectedYear(year);
+        setSelectedWord(word);
+        setShowSearchModal(true);
+    };
+
+    const openSearch = (period) => {
+        if (!selectedWord || !selectedYear) return;
+
+        let fromDate, toDate;
+        const year = parseInt(selectedYear);
+        
+        switch(period) {
+            case 'exact':
+                fromDate = `${year}0101`;
+                toDate = `${year}1231`;
+                break;
+            case 'range':
+                fromDate = `${year - 5}0101`;
+                toDate = `${year + 5}1231`;
+                break;
+            case 'open':
+                fromDate = '';
+                toDate = '';
+                break;
+        }
+
+        const mediatype = corpus === 'avis' ? 'aviser' : 'bøker';
+        const searchUrl = `https://www.nb.no/search?q="${encodeURIComponent(selectedWord)}"&mediatype=${mediatype}${fromDate ? `&fromDate=${fromDate}` : ''}${toDate ? `&toDate=${toDate}` : ''}`;
+        window.open(searchUrl, '_blank');
+        setShowSearchModal(false);
     };
 
     useEffect(() => {
@@ -107,9 +156,11 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: {
-                    mode: 'index',
-                    intersect: false
+                    mode: 'nearest',
+                    intersect: false,
+                    axis: 'x'
                 },
+                onClick: handleChartClick,
                 plugins: {
                     legend: {
                         position: 'top',
@@ -239,15 +290,6 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                   graphType === 'absolute' ? 'Antall forekomster totalt' :
                                   graphType === 'cumulative' ? 'Kumulativt antall' :
                                   'Kohort'
-                        },
-                        label: { 
-                            value: graphType === 'relative' ? 'Relativ frekvens i prosent' :
-                                   graphType === 'absolute' ? 'Antall forekomster totalt' :
-                                   graphType === 'cumulative' ? 'Kumulativt antall' :
-                                   'Kohort',
-                            angle: -90, 
-                            position: 'insideLeft',
-                            style: { textAnchor: 'middle' }
                         }
                     }
                 }
@@ -259,7 +301,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 chartInstance.current.destroy();
             }
         };
-    }, [data, graphType, currentZoomState, settings.smoothing]); // Only depend on smoothing, not all settings
+    }, [data, graphType, currentZoomState, settings.smoothing]);
 
     return (
         <Container fluid className="p-0">
@@ -320,6 +362,26 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                     )}
                 </div>
             </div>
+
+            <Modal show={showSearchModal} onHide={() => setShowSearchModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Søk i Nasjonalbiblioteket</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Søk etter "{selectedWord}" i {corpus === 'avis' ? 'aviser' : 'bøker'}:</p>
+                    <div className="d-grid gap-2">
+                        <Button variant="outline-primary" onClick={() => openSearch('exact')}>
+                            Søk i {selectedYear}
+                        </Button>
+                        <Button variant="outline-primary" onClick={() => openSearch('range')}>
+                            Søk i perioden {selectedYear - 5} - {selectedYear + 5}
+                        </Button>
+                        <Button variant="outline-primary" onClick={() => openSearch('open')}>
+                            Åpen søk
+                        </Button>
+                    </div>
+                </Modal.Body>
+            </Modal>
         </Container>
     );
 };

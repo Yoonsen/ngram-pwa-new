@@ -14,6 +14,7 @@ function App() {
         capitalization: false,
         smoothing: 4
     });
+    const [corpus, setCorpus] = useState('');
 
     const handleSearch = async (words, corpus, lang, graphType) => {
         setLoading(true);
@@ -21,6 +22,7 @@ function App() {
         try {
             const result = await fetchNgramData(words, corpus, lang, graphType, settings);
             setData(result);
+            setCorpus(corpus);
         } catch (err) {
             setError(err.message);
         } finally {
@@ -46,6 +48,7 @@ function App() {
                     data={data} 
                     graphType={graphType}
                     settings={settings}
+                    corpus={corpus}
                 />}
             </div>
         </Container>
