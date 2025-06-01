@@ -92,7 +92,9 @@ const fetchNgramData = async (words, corpus, lang, graphType = 'relative', setti
             case_sens: settings?.capitalization ? '1' : '0',
             corpus: corpusMap[corpus],
             mode: modeMap[graphType],
-            smooth: '1'  // Set to 1 to turn off smoothing
+            smooth: '1',  // Set to 1 to turn off smoothing
+            from: MIN_YEAR.toString(),
+            to: MAX_YEAR.toString()
         });
 
         const url = `${NGRAM_API}?${params.toString()}`;
@@ -124,7 +126,13 @@ const fetchNgramData = async (words, corpus, lang, graphType = 'relative', setti
         const allYears = new Set();
         ngrams.forEach(ngram => {
             if (ngram && ngram.values) {
-                ngram.values.forEach(v => allYears.add(parseInt(v.x)));
+                ngram.values.forEach(v => {
+                    const year = parseInt(v.x);
+                    // Only include years within the valid range
+                    if (year >= MIN_YEAR && year <= MAX_YEAR) {
+                        allYears.add(year);
+                    }
+                });
             }
         });
         
@@ -140,7 +148,14 @@ const fetchNgramData = async (words, corpus, lang, graphType = 'relative', setti
 
                 if (values.length > 0) {
                     // Create a map of year to value for this ngram
-                    const yearToValue = new Map(values.map(v => [parseInt(v.x), graphType === 'absolute' ? v.f : v.y]));
+                    const yearToValue = new Map(
+                        values
+                            .filter(v => {
+                                const year = parseInt(v.x);
+                                return year >= MIN_YEAR && year <= MAX_YEAR;
+                            })
+                            .map(v => [parseInt(v.x), graphType === 'absolute' ? v.f : v.y])
+                    );
                     
                     // Create data array with zeros for missing years
                     let data = sortedYears.map(year => yearToValue.get(year) || 0);

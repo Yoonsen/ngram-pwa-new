@@ -3,6 +3,7 @@ import { Container, Button, ButtonGroup, Modal } from 'react-bootstrap';
 import { Chart, registerables } from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import * as XLSX from 'xlsx';
+import { MIN_YEAR, MAX_YEAR } from '../services/ngramProcessor';
 
 // Register Chart.js components and zoom plugin
 Chart.register(...registerables, zoomPlugin);
@@ -230,6 +231,8 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                         pan: {
                             enabled: true,
                             mode: 'x',
+                            modifierKey: 'shift',
+                            threshold: 10,
                             onPan: () => {
                                 setIsZoomed(true);
                             }
@@ -240,21 +243,29 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 enabled: true,
                                 backgroundColor: 'rgba(0,0,0,0.1)',
                                 borderColor: 'rgba(0,0,0,0.3)',
-                                borderWidth: 1
+                                borderWidth: 1,
+                                threshold: 10
                             },
                             pinch: {
                                 enabled: true
                             },
                             wheel: {
-                                enabled: true
+                                enabled: false
                             },
-                                onZoom: ({chart}) => {
-                                    setIsZoomed(true);
-                                    const start = chart.scales.x.min;
-                                    const end = chart.scales.x.max;
-                                    setZoomStart(Math.round(start));
-                                    setZoomEnd(Math.round(end));
-                                    setCurrentZoomState({ start, end });
+                            limits: {
+                                x: {
+                                    min: MIN_YEAR,
+                                    max: MAX_YEAR,
+                                    minRange: 5
+                                }
+                            },
+                            onZoom: ({chart}) => {
+                                setIsZoomed(true);
+                                const start = Math.max(MIN_YEAR, chart.scales.x.min);
+                                const end = Math.min(MAX_YEAR, chart.scales.x.max);
+                                setZoomStart(Math.round(start));
+                                setZoomEnd(Math.round(end));
+                                setCurrentZoomState({ start, end });
                             }
                         }
                     }
@@ -272,8 +283,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 return Math.round(value).toString().replace(/\s/g, '');
                             }
                         },
-                        min: currentZoomState ? currentZoomState.start : undefined,
-                        max: currentZoomState ? currentZoomState.end : undefined
+                        min: Math.max(MIN_YEAR, currentZoomState ? currentZoomState.start : MIN_YEAR),
+                        max: Math.min(MAX_YEAR, currentZoomState ? currentZoomState.end : MAX_YEAR),
+                        bounds: 'ticks'
                     },
                     y: {
                         title: {
