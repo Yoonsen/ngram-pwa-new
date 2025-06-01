@@ -16,9 +16,12 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
     const [capitalization, setCapitalization] = useState(false);
     const [smoothing, setSmoothing] = useState(4);
 
-    // Notify parent component of settings changes
+    // Notify parent component of settings changes and trigger search
     useEffect(() => {
         onSettingsChange?.({ capitalization, smoothing });
+        if (words) {
+            performSearch();
+        }
     }, [capitalization, smoothing, onSettingsChange]);
 
     const performSearch = () => {
