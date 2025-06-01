@@ -119,7 +119,10 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                         pan: {
                             enabled: true,
                             mode: 'x',
-                            threshold: 10
+                            threshold: 5,
+                            onPan: () => {
+                                setIsZoomed(true);
+                            }
                         },
                         zoom: {
                             mode: 'x',
@@ -129,6 +132,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                                 borderColor: 'rgba(0,0,0,0.3)',
                                 borderWidth: 1,
                                 onDragStart: (e) => {
+                                    e.preventDefault();
                                     const chart = chartInstance.current;
                                     const rect = chart.canvas.getBoundingClientRect();
                                     const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
@@ -136,6 +140,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                                     setZoomStart(Math.round(xValue));
                                 },
                                 onDrag: (e) => {
+                                    e.preventDefault();
                                     const chart = chartInstance.current;
                                     const rect = chart.canvas.getBoundingClientRect();
                                     const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
@@ -143,19 +148,18 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                                     setZoomEnd(Math.round(xValue));
                                 },
                                 onDragEnd: (e) => {
+                                    e.preventDefault();
                                     const chart = chartInstance.current;
                                     const rect = chart.canvas.getBoundingClientRect();
                                     const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
                                     const xValue = chart.scales.x.getValueForPixel(x);
                                     setZoomEnd(Math.round(xValue));
-                                    // Store the zoom state
                                     const newZoomState = {
                                         start: Math.min(zoomStart, Math.round(xValue)),
                                         end: Math.max(zoomStart, Math.round(xValue))
                                     };
                                     setLastZoomState(newZoomState);
                                     setCurrentZoomState(newZoomState);
-                                    // Keep the indicator visible longer on release
                                     setTimeout(() => {
                                         setZoomStart(null);
                                         setZoomEnd(null);
@@ -163,14 +167,16 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                                 }
                             },
                             pinch: {
-                                enabled: true
+                                enabled: true,
+                                onPinch: () => {
+                                    setIsZoomed(true);
+                                }
                             },
                             wheel: {
                                 enabled: true
                             },
                             onZoom: () => {
                                 setIsZoomed(true);
-                                // Update current zoom state when zooming
                                 const chart = chartInstance.current;
                                 if (chart) {
                                     const newZoomState = {
