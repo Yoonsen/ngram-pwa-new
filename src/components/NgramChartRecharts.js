@@ -249,50 +249,10 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 enabled: true,
                                 backgroundColor: 'rgba(0,0,0,0.1)',
                                 borderColor: 'rgba(0,0,0,0.3)',
-                                borderWidth: 1,
-                                onDragStart: (e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    const chart = chartInstance.current;
-                                    const rect = chart.canvas.getBoundingClientRect();
-                                    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                                    const xValue = chart.scales.x.getValueForPixel(x);
-                                    setZoomStart(Math.round(xValue));
-                                },
-                                onDrag: (e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    const chart = chartInstance.current;
-                                    const rect = chart.canvas.getBoundingClientRect();
-                                    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                                    const xValue = chart.scales.x.getValueForPixel(x);
-                                    setZoomEnd(Math.round(xValue));
-                                },
-                                onDragEnd: (e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    const chart = chartInstance.current;
-                                    const rect = chart.canvas.getBoundingClientRect();
-                                    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-                                    const xValue = chart.scales.x.getValueForPixel(x);
-                                    setZoomEnd(Math.round(xValue));
-                                    const newZoomState = {
-                                        start: Math.min(zoomStart, Math.round(xValue)),
-                                        end: Math.max(zoomStart, Math.round(xValue))
-                                    };
-                                    setLastZoomState(newZoomState);
-                                    setCurrentZoomState(newZoomState);
-                                    setTimeout(() => {
-                                        setZoomStart(null);
-                                        setZoomEnd(null);
-                                    }, 2000);
-                                }
+                                borderWidth: 1
                             },
                             pinch: {
-                                enabled: true,
-                                onPinch: () => {
-                                    setIsZoomed(true);
-                                }
+                                enabled: true
                             },
                             wheel: {
                                 enabled: true
