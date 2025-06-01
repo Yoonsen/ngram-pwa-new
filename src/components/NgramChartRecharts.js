@@ -62,10 +62,20 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             
             // Handle cohort data
             if (graphType === 'cohort') {
-                const total = values.reduce((sum, val) => sum + val, 0);
-                if (total > 0) {
-                    values = values.map(val => val / total);
-                }
+                // Calculate yearly totals across all words
+                const yearlyTotals = data.series.reduce((totals, series) => {
+                    series.data.forEach((value, index) => {
+                        if (!totals[index]) totals[index] = 0;
+                        totals[index] += value;
+                    });
+                    return totals;
+                }, {});
+
+                // Calculate proportions within each year
+                values = values.map((value, index) => {
+                    const yearTotal = yearlyTotals[index];
+                    return yearTotal > 0 ? value / yearTotal : 0;
+                });
             }
 
             return {
