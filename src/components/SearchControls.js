@@ -97,12 +97,20 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                         onChange={(e) => setWords(e.target.value)}
                         placeholder="Enter words to search..."
                         aria-label="Search words"
+                        style={{ borderRight: 'none' }}
                     />
                     <div className="dropdown">
                         <button
                             className="btn btn-outline-secondary dropdown-toggle"
                             type="button"
                             onClick={() => setShowLangDropdown(!showLangDropdown)}
+                            style={{ 
+                                borderLeft: 'none',
+                                borderRadius: '0',
+                                borderTop: '1px solid #ced4da',
+                                borderBottom: '1px solid #ced4da',
+                                borderRight: '1px solid #ced4da'
+                            }}
                         >
                             {lang}
                         </button>
