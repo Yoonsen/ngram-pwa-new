@@ -258,12 +258,12 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
 
             <Modal show={showToolsModal} onHide={() => setShowToolsModal(false)} centered>
                 <Modal.Header closeButton>
-                    <Modal.Title>Tools</Modal.Title>
+                    <Modal.Title>Verktøy</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <div className="d-grid gap-3">
                         <div className="d-flex align-items-center justify-content-between">
-                            <Form.Label className="mb-0">Capitalization</Form.Label>
+                            <Form.Label className="mb-0">Skill mellom stor og liten forbokstav</Form.Label>
                             <Form.Check 
                                 type="switch"
                                 id="capitalization-switch"
@@ -273,7 +273,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                         </div>
                         
                         <div>
-                            <Form.Label>Smoothing: {smoothing} years</Form.Label>
+                            <Form.Label>Utjevning av kurve: {smoothing} år</Form.Label>
                             <Form.Range
                                 min={0}
                                 max={20}
@@ -319,7 +319,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 setShowToolsModal(false);
                             }}
                         >
-                            Download CSV
+                            Last ned som CSV
                         </Button>
                         <Button
                             variant="outline-success"
@@ -353,7 +353,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 setShowToolsModal(false);
                             }}
                         >
-                            Download Excel
+                            Last ned som Excel
                         </Button>
                     </div>
                 </Modal.Body>
