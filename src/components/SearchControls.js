@@ -16,13 +16,10 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
     const [capitalization, setCapitalization] = useState(false);
     const [smoothing, setSmoothing] = useState(4);
 
-    // Notify parent component of settings changes and trigger search
-    useEffect(() => {
-        onSettingsChange?.({ capitalization, smoothing });
-        if (words) {
-            performSearch();
-        }
-    }, [capitalization, smoothing, onSettingsChange]);
+    const updateCapitalization = (newValue) => {
+        setCapitalization(newValue);
+        onSettingsChange?.({ capitalization: newValue, smoothing });
+    };
 
     const performSearch = () => {
         const wordList = words.split(',')
@@ -258,7 +255,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 type="switch"
                                 id="capitalization-switch"
                                 checked={capitalization}
-                                onChange={(e) => setCapitalization(e.target.checked)}
+                                onChange={(e) => updateCapitalization(e.target.checked)}
                             />
                         </div>
                         
@@ -268,7 +265,14 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 min={0}
                                 max={20}
                                 value={smoothing}
-                                onChange={(e) => setSmoothing(parseInt(e.target.value))}
+                                onChange={(e) => {
+                                    const newValue = parseInt(e.target.value);
+                                    setSmoothing(newValue);
+                                    onSettingsChange?.({ capitalization, smoothing: newValue });
+                                    if (words) {
+                                        onSearch(words.split(',').map(w => w.trim()).filter(w => w.length > 0), corpus, lang, graphType);
+                                    }
+                                }}
                             />
                         </div>
 
