@@ -10,4 +10,24 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.btn-primary {
+  background-color: #4a6fa5 !important;
+  border-color: #4a6fa5 !important;
+}
+
+.btn-primary:hover {
+  background-color: #3a5a8c !important;
+  border-color: #3a5a8c !important;
+}
+
+.btn-outline-primary {
+  color: #4a6fa5 !important;
+  border-color: #4a6fa5 !important;
+}
+
+.btn-outline-primary:hover {
+  background-color: #4a6fa5 !important;
+  border-color: #4a6fa5 !important;
 } 
