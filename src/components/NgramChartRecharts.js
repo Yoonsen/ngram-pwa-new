@@ -309,32 +309,6 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                         userSelect: 'none'
                     }}
                 />
-                {(zoomStart !== null || zoomEnd !== null) && (
-                    <div style={{
-                        position: 'absolute',
-                        top: '50px',
-                        left: '50%',
-                        transform: 'translateX(-50%)',
-                        backgroundColor: 'rgba(0,0,0,0.9)',
-                        color: 'white',
-                        padding: '10px 20px',
-                        borderRadius: '6px',
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        zIndex: 1000,
-                        boxShadow: '0 4px 8px rgba(0,0,0,0.3)',
-                        transition: 'all 0.2s ease',
-                        pointerEvents: 'none',
-                        whiteSpace: 'nowrap'
-                    }}>
-                        {zoomStart && zoomEnd ? 
-                            `Selected: ${zoomStart} - ${zoomEnd}` :
-                            zoomStart ? 
-                            `From ${zoomStart}` :
-                            `To ${zoomEnd}`
-                        }
-                    </div>
-                )}
             </div>
             <div className="text-center mt-2">
                 <small className="text-muted">
