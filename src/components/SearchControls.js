@@ -15,10 +15,17 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
     const [showToolsModal, setShowToolsModal] = useState(false);
     const [capitalization, setCapitalization] = useState(false);
     const [smoothing, setSmoothing] = useState(4);
+    const [lineThickness, setLineThickness] = useState(2);
+    const [lineTransparency, setLineTransparency] = useState(0.1);
 
     const updateCapitalization = (newValue) => {
         setCapitalization(newValue);
-        onSettingsChange?.({ capitalization: newValue, smoothing });
+        onSettingsChange?.({ 
+            capitalization: newValue, 
+            smoothing,
+            lineThickness,
+            lineTransparency
+        });
     };
 
     const performSearch = () => {
@@ -300,10 +307,53 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 onChange={(e) => {
                                     const newValue = parseInt(e.target.value);
                                     setSmoothing(newValue);
-                                    onSettingsChange?.({ capitalization, smoothing: newValue });
+                                    onSettingsChange?.({ 
+                                        capitalization, 
+                                        smoothing: newValue,
+                                        lineThickness,
+                                        lineTransparency
+                                    });
                                     if (words) {
                                         onSearch(words.split(',').map(w => w.trim()).filter(w => w.length > 0), corpus, lang, graphType);
                                     }
+                                }}
+                            />
+                        </div>
+
+                        <div>
+                            <Form.Label>Linjetykkelse: {lineThickness}px</Form.Label>
+                            <Form.Range
+                                min={1}
+                                max={10}
+                                value={lineThickness}
+                                onChange={(e) => {
+                                    const newValue = parseInt(e.target.value);
+                                    setLineThickness(newValue);
+                                    onSettingsChange?.({ 
+                                        capitalization, 
+                                        smoothing,
+                                        lineThickness: newValue,
+                                        lineTransparency
+                                    });
+                                }}
+                            />
+                        </div>
+
+                        <div>
+                            <Form.Label>Transparens: {Math.round(lineTransparency * 100)}%</Form.Label>
+                            <Form.Range
+                                min={0}
+                                max={100}
+                                value={lineTransparency * 100}
+                                onChange={(e) => {
+                                    const newValue = parseInt(e.target.value) / 100;
+                                    setLineTransparency(newValue);
+                                    onSettingsChange?.({ 
+                                        capitalization, 
+                                        smoothing,
+                                        lineThickness,
+                                        lineTransparency: newValue
+                                    });
                                 }}
                             />
                         </div>
