@@ -182,10 +182,10 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                                 setLang(language.code);
                                                 setShowLangDropdown(false);
                                             }}
-                                        >
+                                    >
                                             {language.code}
                                         </button>
-                                    ))}
+                                ))}
                                 </div>
                             )}
                         </div>
@@ -199,7 +199,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                     </InputGroup>
                 </Form>
 
-                <div className="d-flex gap-2">
+                    <div className="d-flex gap-2">
                     <ButtonGroup>
                         <div className="dropdown">
                             <button
@@ -248,7 +248,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 zIndex: 1001,
                                 minWidth: '120px'
                             }}
-                        >
+                            >
                             {graphType === 'relative' ? 'Relativ' :
                              graphType === 'absolute' ? 'Absolutt' :
                              graphType === 'cumulative' ? 'Kumulativ' :
@@ -324,7 +324,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                 <Modal.Body>
                     <div className="d-grid gap-2">
                         {graphTypes.map(type => (
-                            <Button 
+                            <Button
                                 key={type.id}
                                 variant={graphType === type.id ? 'primary' : 'outline-primary'}
                                 onClick={() => handleGraphTypeSelect(type.id)}

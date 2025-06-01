@@ -33,25 +33,25 @@ function App() {
     return (
         <Container fluid className="p-4">
             <div className="mb-4">
-                <SearchControls 
-                    onSearch={handleSearch}
-                    onGraphTypeChange={setGraphType}
+                    <SearchControls 
+                        onSearch={handleSearch}
+                        onGraphTypeChange={setGraphType}
                     data={data}
                     onSettingsChange={setSettings}
-                />
+                    />
             </div>
-            
+                    
             <div className="chart-container" style={{ height: 'calc(100vh - 120px)' }}>
-                {loading && <div>Loading...</div>}
-                {error && <div className="text-danger">{error}</div>}
+                        {loading && <div>Loading...</div>}
+                        {error && <div className="text-danger">{error}</div>}
                 {data && <NgramChartRecharts 
                     data={data} 
                     graphType={graphType}
                     settings={settings}
                     corpus={corpus}
                 />}
-            </div>
-        </Container>
+                </div>
+            </Container>
     );
 }
 

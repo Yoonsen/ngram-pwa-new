@@ -33,4 +33,15 @@
 - `src/components/NgramChartRecharts.js`
 - `src/components/SearchControls.js`
 - `src/services/ngramProcessor.js`
-- `src/App.js` 
+- `src/App.js`
+
+## 2024-03-19
+- Fixed zoom functionality on mobile devices
+  - Simplified Chart.js zoom configuration
+  - Made reset button always visible
+  - Improved touch zoom handling
+  - Added proper zoom state tracking
+- Improved layout responsiveness
+  - Made input field expand with window width
+  - Enhanced mobile layout with proper stacking
+  - Added flex handling for better control organization 

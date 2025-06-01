@@ -248,8 +248,13 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                             wheel: {
                                 enabled: true
                             },
-                            onZoom: () => {
-                                setIsZoomed(true);
+                                onZoom: ({chart}) => {
+                                    setIsZoomed(true);
+                                    const start = chart.scales.x.min;
+                                    const end = chart.scales.x.max;
+                                    setZoomStart(Math.round(start));
+                                    setZoomEnd(Math.round(end));
+                                    setCurrentZoomState({ start, end });
                             }
                         }
                     }
@@ -336,12 +341,12 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                     Klikk å dra for å indikere en periode (zoom inn)
                 </small>
                 <div className="mt-2">
-                    <Button 
-                        variant="outline-secondary" 
-                        size="sm"
-                        onClick={resetZoom}
-                        className="me-2"
-                    >
+                        <Button 
+                            variant="outline-secondary" 
+                            size="sm"
+                            onClick={resetZoom}
+                            className="me-2"
+                        >
                         Gjenopprett hele perioden
                     </Button>
                 </div>
@@ -363,7 +368,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                         <Button variant="outline-primary" onClick={() => openSearch('open')}>
                             Åpen søk
                         </Button>
-                    </div>
+                </div>
                 </Modal.Body>
             </Modal>
         </Container>
