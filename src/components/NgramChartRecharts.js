@@ -252,10 +252,12 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 borderWidth: 1
                             },
                             pinch: {
-                                enabled: true
+                                enabled: true,
+                                speed: 0.5
                             },
                             wheel: {
-                                enabled: true
+                                enabled: true,
+                                speed: 0.5
                             },
                             onZoom: () => {
                                 setIsZoomed(true);
