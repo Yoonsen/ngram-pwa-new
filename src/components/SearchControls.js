@@ -148,8 +148,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             type="button"
                             onClick={() => setShowCorpusDropdown(!showCorpusDropdown)}
                             style={{ 
-                                borderColor: '#ced4da',
-                                backgroundColor: 'white'
+                                borderColor: '#ced4da'
                             }}
                         >
                             {corpus}
@@ -186,25 +185,39 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                         onClick={() => setShowGraphTypeDropdown(!showGraphTypeDropdown)}
                         style={{ 
                             borderColor: '#ced4da',
-                            backgroundColor: 'white'
+                            position: 'relative',
+                            zIndex: 1001
                         }}
                     >
-                        {graphType}
+                        {graphType === 'relative' ? 'Relativ' :
+                         graphType === 'absolute' ? 'Absolutt' :
+                         graphType === 'cumulative' ? 'Kumulativ' :
+                         'Kohort'}
                     </button>
                     {showGraphTypeDropdown && (
-                        <div className="dropdown-menu show">
-                            {graphTypes.map(type => (
-                                <button
-                                    key={type.id}
-                                    className="dropdown-item"
-                                    onClick={() => {
-                                        handleGraphTypeSelect(type.id);
-                                        setShowGraphTypeDropdown(false);
-                                    }}
-                                >
-                                    {type.id}
-                                </button>
-                            ))}
+                        <div className="dropdown-menu show" style={{ 
+                            position: 'absolute',
+                            zIndex: 1000,
+                            top: '100%',
+                            left: 0,
+                            marginTop: '0.125rem'
+                        }}>
+                            <button className="dropdown-item" onClick={() => {
+                                handleGraphTypeSelect('relative');
+                                setShowGraphTypeDropdown(false);
+                            }}>Relativ</button>
+                            <button className="dropdown-item" onClick={() => {
+                                handleGraphTypeSelect('absolute');
+                                setShowGraphTypeDropdown(false);
+                            }}>Absolutt</button>
+                            <button className="dropdown-item" onClick={() => {
+                                handleGraphTypeSelect('cumulative');
+                                setShowGraphTypeDropdown(false);
+                            }}>Kumulativ</button>
+                            <button className="dropdown-item" onClick={() => {
+                                handleGraphTypeSelect('cohort');
+                                setShowGraphTypeDropdown(false);
+                            }}>Kohort</button>
                         </div>
                     )}
                 </div>
