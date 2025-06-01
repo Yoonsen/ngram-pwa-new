@@ -133,6 +133,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                                 borderWidth: 1,
                                 onDragStart: (e) => {
                                     e.preventDefault();
+                                    e.stopPropagation();
                                     const chart = chartInstance.current;
                                     const rect = chart.canvas.getBoundingClientRect();
                                     const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
@@ -141,6 +142,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                                 },
                                 onDrag: (e) => {
                                     e.preventDefault();
+                                    e.stopPropagation();
                                     const chart = chartInstance.current;
                                     const rect = chart.canvas.getBoundingClientRect();
                                     const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
@@ -149,6 +151,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                                 },
                                 onDragEnd: (e) => {
                                     e.preventDefault();
+                                    e.stopPropagation();
                                     const chart = chartInstance.current;
                                     const rect = chart.canvas.getBoundingClientRect();
                                     const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
@@ -225,8 +228,19 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
 
     return (
         <Container fluid className="p-0">
-            <div style={{ width: '100%', height: 400 }}>
-                <canvas ref={chartRef} />
+            <div style={{ 
+                width: '100%', 
+                height: 400,
+                position: 'relative',
+                touchAction: 'none'
+            }}>
+                <canvas 
+                    ref={chartRef} 
+                    style={{
+                        touchAction: 'none',
+                        userSelect: 'none'
+                    }}
+                />
                 {(zoomStart !== null || zoomEnd !== null) && (
                     <div style={{
                         position: 'absolute',
