@@ -10,6 +10,10 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [graphType, setGraphType] = useState('relative');
+    const [settings, setSettings] = useState({
+        capitalization: false,
+        smoothing: 4
+    });
 
     const handleSearch = async (words, corpus, lang, graphType) => {
         setLoading(true);
@@ -30,13 +34,19 @@ function App() {
                 <SearchControls 
                     onSearch={handleSearch}
                     onGraphTypeChange={setGraphType}
+                    data={data}
+                    onSettingsChange={setSettings}
                 />
             </div>
             
             <div className="chart-container" style={{ height: 'calc(100vh - 120px)' }}>
                 {loading && <div>Loading...</div>}
                 {error && <div className="text-danger">{error}</div>}
-                {data && <NgramChartRecharts data={data} graphType={graphType} />}
+                {data && <NgramChartRecharts 
+                    data={data} 
+                    graphType={graphType}
+                    settings={settings}
+                />}
             </div>
         </Container>
     );

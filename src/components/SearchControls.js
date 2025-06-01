@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, ButtonGroup, InputGroup, Modal, Dropdown } from 'react-bootstrap';
-import { FaBook, FaNewspaper, FaChartLine, FaSearch, FaLanguage } from 'react-icons/fa';
+import { FaBook, FaNewspaper, FaChartLine, FaSearch, FaLanguage, FaTools } from 'react-icons/fa';
+import * as XLSX from 'xlsx';
 
-const SearchControls = ({ onSearch, onGraphTypeChange }) => {
+const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange }) => {
     const [words, setWords] = useState('');
     const [corpus, setCorpus] = useState('bok');
     const [lang, setLang] = useState('nob');
     const [graphType, setGraphType] = useState('relative');
     const [showModal, setShowModal] = useState(false);
+    const [showLangDropdown, setShowLangDropdown] = useState(false);
+    const [showCorpusDropdown, setShowCorpusDropdown] = useState(false);
+    const [showGraphTypeDropdown, setShowGraphTypeDropdown] = useState(false);
+    const [showToolsModal, setShowToolsModal] = useState(false);
+    const [capitalization, setCapitalization] = useState(false);
+    const [smoothing, setSmoothing] = useState(4);
+
+    // Notify parent component of settings changes
+    useEffect(() => {
+        onSettingsChange?.({ capitalization, smoothing });
+    }, [capitalization, smoothing, onSettingsChange]);
 
     const performSearch = () => {
         const wordList = words.split(',')
@@ -76,7 +88,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange }) => {
     ];
 
     return (
-        <div className="d-flex flex-column gap-2">
+        <div className="d-flex flex-column gap-2 position-relative">
             <Form onSubmit={handleSubmit} className="d-flex align-items-center gap-3">
                 <InputGroup style={{ width: '40%' }}>
                     <Form.Control
@@ -86,26 +98,31 @@ const SearchControls = ({ onSearch, onGraphTypeChange }) => {
                         placeholder="Enter words to search..."
                         aria-label="Search words"
                     />
-                    <Dropdown>
-                        <Dropdown.Toggle 
-                            variant="outline-secondary" 
-                            id="language-dropdown"
-                            title={getLangLabel(lang)}
+                    <div className="dropdown">
+                        <button
+                            className="btn btn-outline-secondary dropdown-toggle"
+                            type="button"
+                            onClick={() => setShowLangDropdown(!showLangDropdown)}
                         >
-                            <FaLanguage />
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                            {languages.map(l => (
-                                <Dropdown.Item 
-                                    key={l.code}
-                                    active={lang === l.code}
-                                    onClick={() => setLang(l.code)}
-                                >
-                                    {l.label}
-                                </Dropdown.Item>
-                            ))}
-                        </Dropdown.Menu>
-                    </Dropdown>
+                            {lang}
+                        </button>
+                        {showLangDropdown && (
+                            <div className="dropdown-menu show">
+                                {languages.map(language => (
+                                    <button
+                                        key={language.code}
+                                        className="dropdown-item"
+                                        onClick={() => {
+                                            setLang(language.code);
+                                            setShowLangDropdown(false);
+                                        }}
+                                    >
+                                        {language.code}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                     <Button 
                         variant="primary" 
                         type="submit"
@@ -116,36 +133,74 @@ const SearchControls = ({ onSearch, onGraphTypeChange }) => {
                 </InputGroup>
 
                 <ButtonGroup>
-                    <Button
-                        variant={corpus === 'bok' ? 'primary' : 'outline-primary'}
-                        onClick={() => setCorpus('bok')}
-                        title="Books"
-                    >
-                        <FaBook />
-                    </Button>
-                    <Button
-                        variant={corpus === 'avis' ? 'primary' : 'outline-primary'}
-                        onClick={() => setCorpus('avis')}
-                        title="Newspapers"
-                    >
-                        <FaNewspaper />
-                    </Button>
+                    <div className="dropdown">
+                        <button
+                            className="btn btn-outline-secondary dropdown-toggle"
+                            type="button"
+                            onClick={() => setShowCorpusDropdown(!showCorpusDropdown)}
+                        >
+                            {corpus}
+                        </button>
+                        {showCorpusDropdown && (
+                            <div className="dropdown-menu show">
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                        setCorpus('bok');
+                                        setShowCorpusDropdown(false);
+                                    }}
+                                >
+                                    bok
+                                </button>
+                                <button
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                        setCorpus('avis');
+                                        setShowCorpusDropdown(false);
+                                    }}
+                                >
+                                    avis
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </ButtonGroup>
 
-                <Button
-                    variant="outline-primary"
-                    onClick={() => setShowModal(true)}
-                    title="Select Graph Type"
-                >
-                    <FaChartLine />
-                </Button>
+                <div className="dropdown">
+                    <button
+                        className="btn btn-outline-secondary dropdown-toggle"
+                        type="button"
+                        onClick={() => setShowGraphTypeDropdown(!showGraphTypeDropdown)}
+                    >
+                        {graphType}
+                    </button>
+                    {showGraphTypeDropdown && (
+                        <div className="dropdown-menu show">
+                            {graphTypes.map(type => (
+                                <button
+                                    key={type.id}
+                                    className="dropdown-item"
+                                    onClick={() => {
+                                        handleGraphTypeSelect(type.id);
+                                        setShowGraphTypeDropdown(false);
+                                    }}
+                                >
+                                    {type.id}
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </Form>
 
-            {words && (
-                <div className="text-muted small ms-2">
-                    Searching for: {words} in {getCorpusLabel(corpus)} ({getLangLabel(lang)})
-                </div>
-            )}
+            <Button
+                variant="outline-secondary"
+                size="sm"
+                className="position-absolute top-0 end-0 mt-2 me-2"
+                onClick={() => setShowToolsModal(true)}
+            >
+                <FaTools />
+            </Button>
 
             <Modal show={showModal} onHide={() => setShowModal(false)} centered>
                 <Modal.Header closeButton>
@@ -163,6 +218,102 @@ const SearchControls = ({ onSearch, onGraphTypeChange }) => {
                                 {type.label}
                             </Button>
                         ))}
+                    </div>
+                </Modal.Body>
+            </Modal>
+
+            <Modal show={showToolsModal} onHide={() => setShowToolsModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Tools</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="d-grid gap-3">
+                        <div className="d-flex align-items-center justify-content-between">
+                            <Form.Label className="mb-0">Capitalization</Form.Label>
+                            <Form.Check 
+                                type="switch"
+                                id="capitalization-switch"
+                                checked={capitalization}
+                                onChange={(e) => setCapitalization(e.target.checked)}
+                            />
+                        </div>
+                        
+                        <div>
+                            <Form.Label>Smoothing: {smoothing} years</Form.Label>
+                            <Form.Range
+                                min={0}
+                                max={20}
+                                value={smoothing}
+                                onChange={(e) => setSmoothing(parseInt(e.target.value))}
+                            />
+                        </div>
+
+                        <hr />
+
+                        <Button
+                            variant="outline-primary"
+                            onClick={() => {
+                                if (!data?.series) return;
+                                // Create CSV content
+                                const headers = ['Year', ...data.series.map(s => s.name)];
+                                const rows = data.dates.map((year, i) => {
+                                    const values = data.series.map(s => s.data[i]);
+                                    return [year, ...values];
+                                });
+                                
+                                const csvContent = [
+                                    headers.join(','),
+                                    ...rows.map(row => row.join(','))
+                                ].join('\n');
+                                
+                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = `ngram_data_${new Date().toISOString().split('T')[0]}.csv`;
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                                setShowToolsModal(false);
+                            }}
+                        >
+                            Download CSV
+                        </Button>
+                        <Button
+                            variant="outline-success"
+                            onClick={() => {
+                                if (!data?.series) return;
+                                // Create Excel workbook
+                                const wb = XLSX.utils.book_new();
+                                
+                                // Create worksheet data
+                                const wsData = [
+                                    ['Year', ...data.series.map(s => s.name)],
+                                    ...data.dates.map((year, i) => {
+                                        const values = data.series.map(s => s.data[i]);
+                                        return [year, ...values];
+                                    })
+                                ];
+                                
+                                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                                
+                                // Add metadata
+                                ws['!cols'] = [
+                                    { wch: 10 }, // Year column width
+                                    ...data.series.map(() => ({ wch: 15 })) // Data columns width
+                                ];
+                                
+                                // Add worksheet to workbook
+                                XLSX.utils.book_append_sheet(wb, ws, 'Ngram Data');
+                                
+                                // Generate Excel file
+                                XLSX.writeFile(wb, `ngram_data_${new Date().toISOString().split('T')[0]}.xlsx`);
+                                setShowToolsModal(false);
+                            }}
+                        >
+                            Download Excel
+                        </Button>
                     </div>
                 </Modal.Body>
             </Modal>

@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 // Register Chart.js components and zoom plugin
 Chart.register(...registerables, zoomPlugin);
 
-const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
+const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capitalization: false, smoothing: 4 } }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     const [isZoomed, setIsZoomed] = useState(false);
@@ -34,6 +34,24 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
         const labels = data.dates;
         const datasets = data.series.map((series, index) => {
             let values = [...series.data];
+            
+            // Apply capitalization if enabled
+            if (settings.capitalization) {
+                values = values.map(v => v.toUpperCase());
+            }
+            
+            // Apply smoothing if enabled
+            if (settings.smoothing > 0) {
+                const smoothed = [];
+                for (let i = 0; i < values.length; i++) {
+                    const start = Math.max(0, i - Math.floor(settings.smoothing / 2));
+                    const end = Math.min(values.length - 1, i + Math.floor(settings.smoothing / 2));
+                    const window = values.slice(start, end + 1);
+                    const avg = window.reduce((sum, val) => sum + val, 0) / window.length;
+                    smoothed.push(avg);
+                }
+                values = smoothed;
+            }
             
             // Handle cumulative data
             if (graphType === 'cumulative') {
@@ -227,7 +245,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                 chartInstance.current.destroy();
             }
         };
-    }, [data, graphType, currentZoomState]); // Add currentZoomState to dependencies
+    }, [data, graphType, currentZoomState, settings]); // Add currentZoomState and settings to dependencies
 
     return (
         <Container fluid className="p-0">
@@ -286,68 +304,6 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                             Reset Zoom
                         </Button>
                     )}
-                    <ButtonGroup size="sm">
-                        <Button
-                            variant="outline-primary"
-                            onClick={() => {
-                                // Create CSV content
-                                const headers = ['Year', ...data.series.map(s => s.name)];
-                                const rows = data.dates.map((year, i) => {
-                                    const values = data.series.map(s => s.data[i]);
-                                    return [year, ...values];
-                                });
-                                
-                                const csvContent = [
-                                    headers.join(','),
-                                    ...rows.map(row => row.join(','))
-                                ].join('\n');
-                                
-                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `ngram_data_${new Date().toISOString().split('T')[0]}.csv`;
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(url);
-                            }}
-                        >
-                            Download CSV
-                        </Button>
-                        <Button
-                            variant="outline-success"
-                            onClick={() => {
-                                // Create Excel workbook
-                                const wb = XLSX.utils.book_new();
-                                
-                                // Create worksheet data
-                                const wsData = [
-                                    ['Year', ...data.series.map(s => s.name)],
-                                    ...data.dates.map((year, i) => {
-                                        const values = data.series.map(s => s.data[i]);
-                                        return [year, ...values];
-                                    })
-                                ];
-                                
-                                const ws = XLSX.utils.aoa_to_sheet(wsData);
-                                
-                                // Add metadata
-                                ws['!cols'] = [
-                                    { wch: 10 }, // Year column width
-                                    ...data.series.map(() => ({ wch: 15 })) // Data columns width
-                                ];
-                                
-                                // Add worksheet to workbook
-                                XLSX.utils.book_append_sheet(wb, ws, 'Ngram Data');
-                                
-                                // Generate Excel file
-                                XLSX.writeFile(wb, `ngram_data_${new Date().toISOString().split('T')[0]}.xlsx`);
-                            }}
-                        >
-                            Download Excel
-                        </Button>
-                    </ButtonGroup>
                 </div>
             </div>
         </Container>
