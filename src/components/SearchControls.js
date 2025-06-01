@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, ButtonGroup, InputGroup, Modal, Dropdown } from 'react-bootstrap';
-import { FaBook, FaNewspaper, FaChartLine, FaSearch, FaLanguage, FaTools } from 'react-icons/fa';
+import { FaBook, FaNewspaper, FaChartLine, FaSearch, FaLanguage, FaTools, FaDownload } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 
 const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange }) => {
@@ -223,18 +223,37 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                 </div>
             </Form>
 
-            <Button
-                variant="outline-secondary"
-                size="sm"
-                className="position-absolute top-0 end-0 mt-2 me-2"
-                onClick={() => setShowToolsModal(true)}
-                style={{ 
-                    borderColor: '#ced4da',
-                    backgroundColor: 'white'
-                }}
-            >
-                <FaTools />
-            </Button>
+            <div className="position-absolute top-0 end-0 mt-2 me-2 d-flex gap-2">
+                <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    onClick={() => {
+                        if (!data?.series) return;
+                        const canvas = document.querySelector('canvas');
+                        const link = document.createElement('a');
+                        link.download = `ngram_graph_${new Date().toISOString().split('T')[0]}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                    }}
+                    style={{ 
+                        borderColor: '#ced4da',
+                        backgroundColor: 'white'
+                    }}
+                >
+                    <FaDownload />
+                </Button>
+                <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    onClick={() => setShowToolsModal(true)}
+                    style={{ 
+                        borderColor: '#ced4da',
+                        backgroundColor: 'white'
+                    }}
+                >
+                    <FaTools />
+                </Button>
+            </div>
 
             <Modal show={showModal} onHide={() => setShowModal(false)} centered>
                 <Modal.Header closeButton>
