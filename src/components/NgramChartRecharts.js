@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx';
 // Register Chart.js components and zoom plugin
 Chart.register(...registerables, zoomPlugin);
 
-const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capitalization: false, smoothing: 4 }, corpus }) => {
+const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capitalization: false, smoothing: 4 }, corpus: corpusType }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     const [isZoomed, setIsZoomed] = useState(false);
@@ -18,17 +18,6 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [selectedYear, setSelectedYear] = useState(null);
     const [selectedWord, setSelectedWord] = useState(null);
-
-    const resetZoom = () => {
-        if (chartInstance.current) {
-            chartInstance.current.resetZoom();
-            setIsZoomed(false);
-            setZoomStart(null);
-            setZoomEnd(null);
-            setLastZoomState(null);
-            setCurrentZoomState(null);
-        }
-    };
 
     const handleChartClick = (event) => {
         const chart = chartInstance.current;
@@ -70,10 +59,21 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 break;
         }
 
-        const mediatype = corpus === 'avis' ? 'aviser' : 'bøker';
+        const mediatype = corpusType === 'avis' ? 'aviser' : 'bøker';
         const searchUrl = `https://www.nb.no/search?q="${encodeURIComponent(selectedWord)}"&mediatype=${mediatype}${fromDate ? `&fromDate=${fromDate}` : ''}${toDate ? `&toDate=${toDate}` : ''}`;
         window.open(searchUrl, '_blank');
         setShowSearchModal(false);
+    };
+
+    const resetZoom = () => {
+        if (chartInstance.current) {
+            chartInstance.current.resetZoom();
+            setIsZoomed(false);
+            setZoomStart(null);
+            setZoomEnd(null);
+            setLastZoomState(null);
+            setCurrentZoomState(null);
+        }
     };
 
     useEffect(() => {
@@ -122,6 +122,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 });
             }
 
+            const strokeWidth = settings?.lineThickness || 2;
+            const strokeOpacity = 1 - (settings?.lineTransparency || 0.1);
+
             return {
                 label: series.name,
                 data: values,
@@ -131,10 +134,19 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 backgroundColor: series.name === 'bok' ? 'rgba(31, 119, 180, 0.1)' :
                                 series.name === 'avis' ? 'rgba(255, 127, 14, 0.1)' :
                                 `hsla(${(index * 360) / data.series.length}, 70%, 50%, 0.1)`,
-                borderWidth: series.name === 'bok' || series.name === 'avis' ? 3 : 2,
-                pointRadius: 0,
-                pointHoverRadius: 4,
-                tension: 0.4
+                borderWidth: strokeWidth,
+                borderOpacity: strokeOpacity,
+                pointRadius: 0,  // Hide points by default
+                pointHoverRadius: 12,  // Show larger points on hover
+                pointHitRadius: 20,  // Keep large hit area for better click detection
+                pointStyle: 'circle',
+                tension: 0.4,
+                showLine: true,
+                pointBackgroundColor: series.name === 'bok' ? '#1f77b4' : 
+                                    series.name === 'avis' ? '#ff7f0e' :
+                                    `hsl(${(index * 360) / data.series.length}, 70%, 50%)`,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2
             };
         });
 
@@ -157,10 +169,13 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 maintainAspectRatio: false,
                 interaction: {
                     mode: 'nearest',
-                    intersect: false,
-                    axis: 'x'
+                    intersect: true,  // Changed to true for better click detection
+                    axis: 'xy'        // Changed to xy for better click detection
                 },
                 onClick: handleChartClick,
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                },
                 plugins: {
                     legend: {
                         position: 'top',
@@ -171,6 +186,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                         }
                     },
                     tooltip: {
+                        enabled: true,
                         backgroundColor: 'rgba(255, 255, 255, 0.9)',
                         titleColor: '#000',
                         bodyColor: '#000',
@@ -279,7 +295,6 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 return Math.round(value).toString().replace(/\s/g, '');
                             }
                         },
-                        // Apply current zoom state if it exists
                         min: currentZoomState ? currentZoomState.start : undefined,
                         max: currentZoomState ? currentZoomState.end : undefined
                     },
@@ -301,7 +316,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 chartInstance.current.destroy();
             }
         };
-    }, [data, graphType, currentZoomState, settings.smoothing]);
+    }, [data, graphType, currentZoomState, settings.smoothing, settings.lineThickness, settings.lineTransparency]);
 
     return (
         <Container fluid className="p-0">
@@ -368,7 +383,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                     <Modal.Title>Søk i Nasjonalbiblioteket</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>Søk etter "{selectedWord}" i {corpus === 'avis' ? 'aviser' : 'bøker'}:</p>
+                    <p>Søk etter "{selectedWord}" i {corpusType === 'avis' ? 'aviser' : 'bøker'}:</p>
                     <div className="d-grid gap-2">
                         <Button variant="outline-primary" onClick={() => openSearch('exact')}>
                             Søk i {selectedYear}
