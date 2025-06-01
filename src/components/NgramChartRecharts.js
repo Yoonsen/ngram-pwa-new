@@ -18,6 +18,8 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [selectedYear, setSelectedYear] = useState(null);
     const [selectedWord, setSelectedWord] = useState(null);
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
 
     const handleChartClick = (event) => {
         const chart = chartInstance.current;
@@ -74,6 +76,45 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             setLastZoomState(null);
             setCurrentZoomState(null);
         }
+    };
+
+    const handleTouchStart = (e) => {
+        if (e.touches.length === 2) {
+            setTouchStart({
+                x1: e.touches[0].clientX,
+                x2: e.touches[1].clientX
+            });
+        }
+    };
+
+    const handleTouchMove = (e) => {
+        if (e.touches.length === 2 && touchStart) {
+            const currentX1 = e.touches[0].clientX;
+            const currentX2 = e.touches[1].clientX;
+            const startDistance = Math.abs(touchStart.x1 - touchStart.x2);
+            const currentDistance = Math.abs(currentX1 - currentX2);
+            
+            if (chartInstance.current) {
+                const chart = chartInstance.current;
+                const scale = chart.scales.x;
+                const range = scale.max - scale.min;
+                const center = (scale.min + scale.max) / 2;
+                const zoomFactor = startDistance / currentDistance;
+                
+                const newMin = center - (range * zoomFactor) / 2;
+                const newMax = center + (range * zoomFactor) / 2;
+                
+                scale.min = newMin;
+                scale.max = newMax;
+                chart.update('none');
+                setIsZoomed(true);
+            }
+        }
+    };
+
+    const handleTouchEnd = () => {
+        setTouchStart(null);
+        setTouchEnd(null);
     };
 
     useEffect(() => {
@@ -251,9 +292,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                             },
                             pinch: {
                                 enabled: true,
-                                speed: 0.5,
-                                threshold: 10,
-                                sensitivity: 3
+                                speed: 1,
+                                threshold: 0,
+                                sensitivity: 1
                             },
                             wheel: {
                                 enabled: true,
@@ -332,6 +373,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                         msTouchAction: 'none',
                         msUserSelect: 'none'
                     }}
+                    onTouchStart={handleTouchStart}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
                 />
                 {(zoomStart !== null || zoomEnd !== null) && (
                     <div style={{
