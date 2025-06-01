@@ -34,6 +34,10 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
             lineThickness,
             lineTransparency
         });
+        // Trigger a new search with updated capitalization setting
+        if (words) {
+            performSearch();
+        }
     };
 
     const performSearch = () => {
