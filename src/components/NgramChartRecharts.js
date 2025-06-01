@@ -13,13 +13,10 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
     const [isZoomed, setIsZoomed] = useState(false);
     const [zoomStart, setZoomStart] = useState(null);
     const [zoomEnd, setZoomEnd] = useState(null);
-    const [lastZoomState, setLastZoomState] = useState(null);
     const [currentZoomState, setCurrentZoomState] = useState(null);
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [selectedYear, setSelectedYear] = useState(null);
     const [selectedWord, setSelectedWord] = useState(null);
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
 
     const handleChartClick = (event) => {
         const chart = chartInstance.current;
@@ -73,48 +70,8 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             setIsZoomed(false);
             setZoomStart(null);
             setZoomEnd(null);
-            setLastZoomState(null);
             setCurrentZoomState(null);
         }
-    };
-
-    const handleTouchStart = (e) => {
-        if (e.touches.length === 2) {
-            setTouchStart({
-                x1: e.touches[0].clientX,
-                x2: e.touches[1].clientX
-            });
-        }
-    };
-
-    const handleTouchMove = (e) => {
-        if (e.touches.length === 2 && touchStart) {
-            const currentX1 = e.touches[0].clientX;
-            const currentX2 = e.touches[1].clientX;
-            const startDistance = Math.abs(touchStart.x1 - touchStart.x2);
-            const currentDistance = Math.abs(currentX1 - currentX2);
-            
-            if (chartInstance.current) {
-                const chart = chartInstance.current;
-                const scale = chart.scales.x;
-                const range = scale.max - scale.min;
-                const center = (scale.min + scale.max) / 2;
-                const zoomFactor = startDistance / currentDistance;
-                
-                const newMin = center - (range * zoomFactor) / 2;
-                const newMax = center + (range * zoomFactor) / 2;
-                
-                scale.min = newMin;
-                scale.max = newMax;
-                chart.update('none');
-                setIsZoomed(true);
-            }
-        }
-    };
-
-    const handleTouchEnd = () => {
-        setTouchStart(null);
-        setTouchEnd(null);
     };
 
     useEffect(() => {
@@ -150,7 +107,6 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             
             // Handle cumulative data
             if (graphType === 'cumulative') {
-                // Simply sum up the values
                 let sum = 0;
                 values = values.map(val => {
                     sum += val;
@@ -271,13 +227,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                         }
                     },
                     zoom: {
-                        limits: {
-                            x: {min: 'original', max: 'original'}
-                        },
                         pan: {
                             enabled: true,
                             mode: 'x',
-                            threshold: 5,
                             onPan: () => {
                                 setIsZoomed(true);
                             }
@@ -291,25 +243,13 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 borderWidth: 1
                             },
                             pinch: {
-                                enabled: true,
-                                speed: 1,
-                                threshold: 0,
-                                sensitivity: 1
+                                enabled: true
                             },
                             wheel: {
-                                enabled: true,
-                                speed: 0.5
+                                enabled: true
                             },
                             onZoom: () => {
                                 setIsZoomed(true);
-                                const chart = chartInstance.current;
-                                if (chart) {
-                                    const newZoomState = {
-                                        start: chart.scales.x.min,
-                                        end: chart.scales.x.max
-                                    };
-                                    setCurrentZoomState(newZoomState);
-                                }
                             }
                         }
                     }
@@ -355,27 +295,14 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             <div style={{ 
                 width: '100%', 
                 height: 400,
-                position: 'relative',
-                touchAction: 'none',
-                WebkitTouchCallout: 'none',
-                WebkitUserSelect: 'none',
-                userSelect: 'none',
-                msTouchAction: 'none',
-                msUserSelect: 'none'
+                position: 'relative'
             }}>
                 <canvas 
                     ref={chartRef} 
                     style={{
                         touchAction: 'none',
-                        WebkitTouchCallout: 'none',
-                        WebkitUserSelect: 'none',
-                        userSelect: 'none',
-                        msTouchAction: 'none',
-                        msUserSelect: 'none'
+                        userSelect: 'none'
                     }}
-                    onTouchStart={handleTouchStart}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
                 />
                 {(zoomStart !== null || zoomEnd !== null) && (
                     <div style={{
@@ -409,16 +336,14 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                     Klikk å dra for å indikere en periode (zoom inn)
                 </small>
                 <div className="mt-2">
-                    {isZoomed && (
-                        <Button 
-                            variant="outline-secondary" 
-                            size="sm"
-                            onClick={resetZoom}
-                            className="me-2"
-                        >
-                            Gjenopprett hele perioden
-                        </Button>
-                    )}
+                    <Button 
+                        variant="outline-secondary" 
+                        size="sm"
+                        onClick={resetZoom}
+                        className="me-2"
+                    >
+                        Gjenopprett hele perioden
+                    </Button>
                 </div>
             </div>
 
