@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/ngram-pwa-new/static/css/main.c5e9d42b.css",
-    "main.js": "/ngram-pwa-new/static/js/main.cb700011.js",
+    "main.js": "/ngram-pwa-new/static/js/main.52b2c183.js",
     "index.html": "/ngram-pwa-new/index.html",
     "main.c5e9d42b.css.map": "/ngram-pwa-new/static/css/main.c5e9d42b.css.map",
-    "main.cb700011.js.map": "/ngram-pwa-new/static/js/main.cb700011.js.map"
+    "main.52b2c183.js.map": "/ngram-pwa-new/static/js/main.52b2c183.js.map"
   },
   "entrypoints": [
     "static/css/main.c5e9d42b.css",
-    "static/js/main.cb700011.js"
+    "static/js/main.52b2c183.js"
   ]
 }
