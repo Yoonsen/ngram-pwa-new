@@ -38,6 +38,7 @@ code {
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -46,9 +47,17 @@ code {
     align-items: stretch;
   }
   
-  .year-inputs {
-    display: flex;
-    gap: 1rem;
+  .search-controls .input-group {
+    width: 100% !important;
+  }
+  
+  .search-controls .btn-group {
     width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .search-controls .btn {
+    flex: 1;
   }
 } 
