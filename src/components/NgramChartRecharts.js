@@ -188,8 +188,8 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 maintainAspectRatio: false,
                 interaction: {
                     mode: 'nearest',
-                    intersect: true,  // Changed to true for better click detection
-                    axis: 'xy'        // Changed to xy for better click detection
+                    intersect: true,
+                    axis: 'xy'
                 },
                 onClick: handleChartClick,
                 onHover: (event, elements) => {
@@ -251,7 +251,8 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                             },
                             pinch: {
                                 enabled: true,
-                                speed: 0.5
+                                speed: 0.5,
+                                threshold: 10
                             },
                             wheel: {
                                 enabled: true,
@@ -313,12 +314,17 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 width: '100%', 
                 height: 400,
                 position: 'relative',
-                touchAction: 'none'
+                touchAction: 'none',
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                userSelect: 'none'
             }}>
                 <canvas 
                     ref={chartRef} 
                     style={{
                         touchAction: 'none',
+                        WebkitTouchCallout: 'none',
+                        WebkitUserSelect: 'none',
                         userSelect: 'none'
                     }}
                 />
