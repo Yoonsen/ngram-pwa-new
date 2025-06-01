@@ -30,4 +30,25 @@ code {
 .btn-outline-primary:hover {
   background-color: #4a6fa5 !important;
   border-color: #4a6fa5 !important;
+}
+
+.search-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .search-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .year-inputs {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+  }
 } 
