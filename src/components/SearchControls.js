@@ -147,6 +147,10 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             className="btn btn-outline-secondary dropdown-toggle"
                             type="button"
                             onClick={() => setShowCorpusDropdown(!showCorpusDropdown)}
+                            style={{ 
+                                borderColor: '#ced4da',
+                                backgroundColor: 'white'
+                            }}
                         >
                             {corpus}
                         </button>
@@ -180,6 +184,10 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                         className="btn btn-outline-secondary dropdown-toggle"
                         type="button"
                         onClick={() => setShowGraphTypeDropdown(!showGraphTypeDropdown)}
+                        style={{ 
+                            borderColor: '#ced4da',
+                            backgroundColor: 'white'
+                        }}
                     >
                         {graphType}
                     </button>
@@ -207,6 +215,10 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                 size="sm"
                 className="position-absolute top-0 end-0 mt-2 me-2"
                 onClick={() => setShowToolsModal(true)}
+                style={{ 
+                    borderColor: '#ced4da',
+                    backgroundColor: 'white'
+                }}
             >
                 <FaTools />
             </Button>
