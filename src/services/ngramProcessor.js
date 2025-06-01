@@ -89,7 +89,7 @@ const fetchNgramData = async (words, corpus, lang, graphType = 'relative') => {
         const params = new URLSearchParams({
             terms: words.join(','),
             lang: apiLang,
-            case_sens: '0',
+            case_sens: settings?.capitalization ? '1' : '0',
             corpus: corpusMap[corpus],
             mode: modeMap[graphType],
             smooth: '1'  // Set to 1 to turn off smoothing

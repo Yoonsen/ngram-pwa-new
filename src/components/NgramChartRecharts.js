@@ -35,11 +35,6 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
         const datasets = data.series.map((series, index) => {
             let values = [...series.data];
             
-            // Apply capitalization if enabled
-            if (settings.capitalization) {
-                values = values.map(v => v.toUpperCase());
-            }
-            
             // Apply smoothing if enabled
             if (settings.smoothing > 0) {
                 const smoothed = [];
