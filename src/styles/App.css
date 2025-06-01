@@ -1,0 +1,74 @@
+/* Main container styles */
+.container-fluid {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Chart container styles */
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    margin: 20px 0;
+}
+
+/* Year range controls */
+.year-range-controls {
+    margin-top: 10px;
+    padding: 0 20px;
+}
+
+.year-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    color: #666;
+    font-size: 0.9em;
+}
+
+/* Search controls */
+.search-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.search-controls .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Settings sidebar */
+.settings-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    width: 300px;
+    background: white;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.settings-sidebar.open {
+    transform: translateX(0);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .card {
+    background-color: #2d2d2d;
+    border-color: #404040;
+}
+
+[data-theme="dark"] .settings-sidebar {
+    background-color: #2d2d2d;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.3);
+} 
