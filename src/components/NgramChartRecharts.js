@@ -79,10 +79,19 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
     useEffect(() => {
         if (!data || !data.series) return;
 
+        // Log raw data for debugging
+        console.log('Raw data from API:', data);
+        data.series.forEach(series => {
+            console.log(`Series ${series.name} values:`, series.data);
+        });
+
         // Transform data for Chart.js
         const labels = data.dates;
         const datasets = data.series.map((series, index) => {
             let values = [...series.data];
+            
+            // Log raw values for debugging
+            console.log(`Raw values for ${series.name}:`, values);
             
             // Apply smoothing if enabled
             if (settings.smoothing > 0) {
@@ -95,13 +104,25 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                     smoothed.push(avg);
                 }
                 values = smoothed;
+                console.log(`Smoothed values for ${series.name}:`, values);
             }
             
             // Handle cumulative data
             if (graphType === 'cumulative') {
-                values = values.map((_, i) => 
-                    values.slice(0, i + 1).reduce((sum, val) => sum + val, 0)
-                );
+                // Simply sum up the values
+                let sum = 0;
+                values = values.map(val => {
+                    sum += val;
+                    return sum;
+                });
+                console.log(`Cumulative values for ${series.name}:`, values);
+            }
+            
+            // Handle absolute values - ensure they're not being treated as relative
+            if (graphType === 'absolute' && values[0] < 1) {
+                const totalTokens = 100000000000;  // 100 billion total tokens
+                values = values.map(val => val * totalTokens);
+                console.log(`Converted to absolute values for ${series.name}:`, values);
             }
             
             // Handle cohort data
@@ -196,9 +217,17 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                         callbacks: {
                             label: function(context) {
                                 const value = context.raw;
-                                return graphType === 'cohort' ? 
-                                    `${context.dataset.label}: ${(value * 100).toFixed(2)}%` :
-                                    `${context.dataset.label}: ${value.toFixed(6)}`;
+                                
+                                if (graphType === 'cohort') {
+                                    return `${context.dataset.label}: ${(value * 100).toFixed(2)}%`;
+                                } else if (graphType === 'cumulative') {
+                                    return `${context.dataset.label}: ${value}`;
+                                } else if (graphType === 'absolute') {
+                                    return `${context.dataset.label}: ${value}`;
+                                } else if (graphType === 'relative') {
+                                    return `${context.dataset.label}: ${value.toFixed(4)}%`;
+                                }
+                                return `${context.dataset.label}: ${value}`;
                             }
                         }
                     },
@@ -303,7 +332,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                             display: true,
                             text: graphType === 'relative' ? 'Relativ frekvens i prosent' :
                                   graphType === 'absolute' ? 'Antall forekomster totalt' :
-                                  graphType === 'cumulative' ? 'Kumulativt antall' :
+                                  graphType === 'cumulative' ? 'Kumulativt antall (× 100 000)' :
                                   'Kohort'
                         }
                     }
