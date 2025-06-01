@@ -116,12 +116,8 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 console.log(`Cumulative values for ${series.name}:`, values);
             }
             
-            // Handle absolute values - ensure they're not being treated as relative
-            if (graphType === 'absolute' && values[0] < 1) {
-                const totalTokens = 100000000000;  // 100 billion total tokens
-                values = values.map(val => val * totalTokens);
-                console.log(`Converted to absolute values for ${series.name}:`, values);
-            }
+            // Remove unnecessary absolute value conversion
+            // The API already provides absolute counts in the 'f' field
             
             // Handle cohort data
             if (graphType === 'cohort') {
@@ -217,9 +213,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 if (graphType === 'cohort') {
                                     return `${context.dataset.label}: ${(value * 100).toFixed(2)}%`;
                                 } else if (graphType === 'cumulative') {
-                                    return `${context.dataset.label}: ${value}`;
+                                    return `${context.dataset.label}: ${Math.round(value).toLocaleString()}`;
                                 } else if (graphType === 'absolute') {
-                                    return `${context.dataset.label}: ${value}`;
+                                    return `${context.dataset.label}: ${Math.round(value).toLocaleString()}`;
                                 } else if (graphType === 'relative') {
                                     return `${context.dataset.label}: ${value.toFixed(4)}%`;
                                 }
@@ -292,8 +288,20 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                             display: true,
                             text: graphType === 'relative' ? 'Relativ frekvens i prosent' :
                                   graphType === 'absolute' ? 'Antall forekomster totalt' :
-                                  graphType === 'cumulative' ? 'Kumulativt antall (× 100 000)' :
+                                  graphType === 'cumulative' ? 'Kumulativt antall' :
                                   'Kohort'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                if (graphType === 'absolute' || graphType === 'cumulative') {
+                                    return Math.round(value).toLocaleString();
+                                } else if (graphType === 'relative') {
+                                    return value.toFixed(4) + '%';
+                                } else if (graphType === 'cohort') {
+                                    return (value * 100).toFixed(2) + '%';
+                                }
+                                return value;
+                            }
                         }
                     }
                 }
