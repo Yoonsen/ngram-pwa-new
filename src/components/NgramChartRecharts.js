@@ -250,7 +250,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 chartInstance.current.destroy();
             }
         };
-    }, [data, graphType, currentZoomState, settings]); // Add currentZoomState and settings to dependencies
+    }, [data, graphType, currentZoomState, settings.smoothing]); // Only depend on smoothing, not all settings
 
     return (
         <Container fluid className="p-0">
