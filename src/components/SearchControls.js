@@ -111,10 +111,11 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 borderBottom: '1px solid #ced4da',
                                 borderRight: '1px solid #ced4da'
                             }}
+                            disabled={corpus === 'avis'}
                         >
-                            {lang}
+                            {corpus === 'avis' ? 'nor' : lang}
                         </button>
-                        {showLangDropdown && (
+                        {showLangDropdown && corpus !== 'avis' && (
                             <div className="dropdown-menu show">
                                 {languages.map(language => (
                                     <button
