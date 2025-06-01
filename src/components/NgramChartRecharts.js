@@ -252,7 +252,8 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                             pinch: {
                                 enabled: true,
                                 speed: 0.5,
-                                threshold: 10
+                                threshold: 10,
+                                sensitivity: 3
                             },
                             wheel: {
                                 enabled: true,
@@ -317,7 +318,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 touchAction: 'none',
                 WebkitTouchCallout: 'none',
                 WebkitUserSelect: 'none',
-                userSelect: 'none'
+                userSelect: 'none',
+                msTouchAction: 'none',
+                msUserSelect: 'none'
             }}>
                 <canvas 
                     ref={chartRef} 
@@ -325,7 +328,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                         touchAction: 'none',
                         WebkitTouchCallout: 'none',
                         WebkitUserSelect: 'none',
-                        userSelect: 'none'
+                        userSelect: 'none',
+                        msTouchAction: 'none',
+                        msUserSelect: 'none'
                     }}
                 />
                 {(zoomStart !== null || zoomEnd !== null) && (
