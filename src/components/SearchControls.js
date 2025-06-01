@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, Button, ButtonGroup, InputGroup, Modal, Dropdown } from 'react-bootstrap';
+import { Form, Button, ButtonGroup, InputGroup, Modal, Dropdown, Container } from 'react-bootstrap';
 import { FaBook, FaNewspaper, FaChartLine, FaSearch, FaLanguage, FaTools, FaDownload } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 
@@ -17,9 +17,17 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
     const [smoothing, setSmoothing] = useState(4);
     const [lineThickness, setLineThickness] = useState(2);
     const [lineTransparency, setLineTransparency] = useState(0.1);
+    const [showSettings, setShowSettings] = useState(false);
+    const [settings, setSettings] = useState({
+        capitalization,
+        smoothing,
+        lineThickness,
+        lineTransparency
+    });
 
     const updateCapitalization = (newValue) => {
         setCapitalization(newValue);
+        setSettings(prev => ({ ...prev, capitalization: newValue }));
         onSettingsChange?.({ 
             capitalization: newValue, 
             smoothing,
@@ -94,10 +102,51 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
         { code: 'fkv', label: 'Kven' }
     ];
 
+    const handleDownload = () => {
+        if (!data?.series) return;
+        const canvas = document.querySelector('canvas');
+        const link = document.createElement('a');
+        link.download = `ngram_graph_${new Date().toISOString().split('T')[0]}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    };
+
+    const handleDownloadExcel = () => {
+        if (!data?.series) return;
+        // Create Excel workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Create worksheet data
+        const headers = ['Year', ...data.series.map(s => s.name)];
+        const rows = data.dates.map((year, i) => {
+            const values = data.series.map(s => s.data[i]);
+            return [year, ...values];
+        });
+        
+        const wsData = [
+            headers,
+            ...rows
+        ];
+        
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        
+        // Add metadata
+        ws['!cols'] = [
+            { wch: 10 }, // Year column width
+            ...data.series.map(() => ({ wch: 15 })) // Data columns width
+        ];
+        
+        // Add worksheet to workbook
+        XLSX.utils.book_append_sheet(wb, ws, 'Ngram Data');
+        
+        // Generate Excel file
+        XLSX.writeFile(wb, `ngram_data_${new Date().toISOString().split('T')[0]}.xlsx`);
+    };
+
     return (
-        <div className="d-flex flex-column gap-2 position-relative">
-            <Form onSubmit={handleSubmit} className="d-flex align-items-center gap-3">
-                <InputGroup style={{ width: '40%' }}>
+        <div className="d-flex flex-column flex-md-row gap-3 align-items-start w-100">
+            <Form onSubmit={handleSubmit} className="d-flex align-items-center gap-3 flex-grow-1">
+                <InputGroup className="flex-grow-1">
                     <Form.Control
                         type="text"
                         value={words}
@@ -230,8 +279,8 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                 </div>
             </Form>
 
-            <div className="position-absolute top-0 end-0 mt-2 me-2 d-flex gap-2">
-                <Button
+            <div className="d-flex gap-2">
+                <Button 
                     variant="outline-secondary"
                     size="sm"
                     onClick={() => {
@@ -249,7 +298,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                 >
                     <FaDownload />
                 </Button>
-                <Button
+                <Button 
                     variant="outline-secondary"
                     size="sm"
                     onClick={() => setShowToolsModal(true)}
@@ -269,7 +318,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                 <Modal.Body>
                     <div className="d-grid gap-2">
                         {graphTypes.map(type => (
-                            <Button
+                            <Button 
                                 key={type.id}
                                 variant={graphType === type.id ? 'primary' : 'outline-primary'}
                                 onClick={() => handleGraphTypeSelect(type.id)}
