@@ -144,19 +144,17 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             }
 
             const strokeWidth = settings?.lineThickness || 2;
-            const strokeOpacity = 1 - (settings?.lineTransparency || 0.1);
 
             return {
                 label: series.name,
                 data: values,
-                borderColor: series.name === 'bok' ? '#1f77b4' : 
-                            series.name === 'avis' ? '#ff7f0e' :
-                            `hsl(${(index * 360) / data.series.length}, 70%, 50%)`,
+                borderColor: series.name === 'bok' ? `rgba(31, 119, 180, ${1 - (settings?.lineTransparency || 0.1)})` : 
+                            series.name === 'avis' ? `rgba(255, 127, 14, ${1 - (settings?.lineTransparency || 0.1)})` :
+                            `hsla(${(index * 360) / data.series.length}, 70%, 50%, ${1 - (settings?.lineTransparency || 0.1)})`,
                 backgroundColor: series.name === 'bok' ? 'rgba(31, 119, 180, 0.1)' :
                                 series.name === 'avis' ? 'rgba(255, 127, 14, 0.1)' :
                                 `hsla(${(index * 360) / data.series.length}, 70%, 50%, 0.1)`,
                 borderWidth: strokeWidth,
-                borderOpacity: strokeOpacity,
                 pointRadius: 0,  // Hide points by default
                 pointHoverRadius: 12,  // Show larger points on hover
                 pointHitRadius: 20,  // Keep large hit area for better click detection

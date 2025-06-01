@@ -152,7 +152,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             type="text"
                             value={words}
                             onChange={(e) => setWords(e.target.value)}
-                            placeholder="Enter words to search..."
+                            placeholder="Skriv ord skilt med komma"
                             aria-label="Search words"
                             style={{ borderRight: 'none' }}
                         />
