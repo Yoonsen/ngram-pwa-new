@@ -58,7 +58,7 @@ const processNgramData = (data, mode, smooth) => {
 };
 
 // Fetch n-gram data from the API
-const fetchNgramData = async (words, corpus, lang, graphType = 'relative') => {
+const fetchNgramData = async (words, corpus, lang, graphType = 'relative', settings = {}) => {
     try {
         // Map corpus and language to correct API values
         const corpusMap = {

@@ -19,7 +19,7 @@ function App() {
         setLoading(true);
         setError(null);
         try {
-            const result = await fetchNgramData(words, corpus, lang, graphType);
+            const result = await fetchNgramData(words, corpus, lang, graphType, settings);
             setData(result);
         } catch (err) {
             setError(err.message);
