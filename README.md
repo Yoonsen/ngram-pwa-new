@@ -73,19 +73,50 @@ npm run build
 
 ## Development Process and AI Assistance
 
-This project represents a successful collaboration between human developers and AI tools:
+This project serves as a case study for AI-assisted development, particularly in transitioning between different programming ecosystems. It demonstrates how teams with expertise in one technology stack (Python) can successfully develop modern web applications using different technologies (JavaScript/React) with AI assistance.
 
-- Initial conversion from Python/Dash/Plotly to React/JavaScript was assisted by Cursor AI
-- Ongoing development and improvements facilitated by AI pair programming
-- UI/UX refinements and feature implementations guided by human expertise
-- Code quality and best practices maintained through AI-human collaboration
+### Key Insights
 
-The development process showcases how AI can effectively assist in:
-- Complex codebase migrations
-- Feature implementation
-- Code optimization
-- Best practices adoption
-- Problem-solving
+#### Language Transition Success
+- Successfully converted from Python/Dash/Plotly to React/JavaScript
+- Maintained full functionality while modernizing the technology stack
+- Achieved smooth transition despite team's primary Python background
+- Preserved complex visualization features while improving user experience
+
+#### AI as a Development Bridge
+- AI tools provided contextual guidance for JavaScript/React ecosystem
+- Handled complex transitions in:
+  - Component architecture
+  - State management
+  - Modern UI implementation
+  - API integration
+- Translated Python development patterns to JavaScript equivalents
+- Maintained code quality and best practices across languages
+
+#### Collaborative Development Model
+- Human expertise driving:
+  - Data visualization requirements
+  - Library selection
+  - User experience design
+  - Domain-specific features
+- AI assistance with:
+  - Technical implementation
+  - Code structure
+  - Best practices
+  - Documentation
+  - Problem-solving
+
+#### Documentation and Knowledge Transfer
+- Bilingual documentation (English/Norwegian)
+- Clear technical documentation accessible to Python developers
+- Detailed development logging
+- Comprehensive feature documentation
+
+This approach demonstrates how AI tools can effectively bridge technical gaps, enabling teams to:
+- Venture beyond their primary technology stack
+- Implement modern web development practices
+- Maintain high code quality
+- Focus on domain expertise while letting AI handle technical details
 
 ## Acknowledgments
 
