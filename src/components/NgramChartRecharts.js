@@ -200,7 +200,10 @@ const NgramChartRecharts = ({ data, graphType = 'relative' }) => {
                             text: 'Year'
                         },
                         ticks: {
-                            maxTicksLimit: 10
+                            maxTicksLimit: 10,
+                            callback: function(value) {
+                                return Math.round(value).toString().replace(/\s/g, '');
+                            }
                         },
                         // Apply current zoom state if it exists
                         min: currentZoomState ? currentZoomState.start : undefined,
