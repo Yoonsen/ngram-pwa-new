@@ -235,10 +235,19 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                     y: {
                         title: {
                             display: true,
-                            text: graphType === 'absolute' ? 'Absolute Frequency' :
-                                  graphType === 'cumulative' ? 'Cumulative Frequency' :
-                                  graphType === 'cohort' ? 'Proportion' :
-                                  'Relative Frequency'
+                            text: graphType === 'relative' ? 'Relativ frekvens i prosent' :
+                                  graphType === 'absolute' ? 'Antall forekomster totalt' :
+                                  graphType === 'cumulative' ? 'Kumulativt antall' :
+                                  'Kohort'
+                        },
+                        label: { 
+                            value: graphType === 'relative' ? 'Relativ frekvens i prosent' :
+                                   graphType === 'absolute' ? 'Antall forekomster totalt' :
+                                   graphType === 'cumulative' ? 'Kumulativt antall' :
+                                   'Kohort',
+                            angle: -90, 
+                            position: 'insideLeft',
+                            style: { textAnchor: 'middle' }
                         }
                     }
                 }
@@ -296,7 +305,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             </div>
             <div className="text-center mt-2">
                 <small className="text-muted">
-                    Click and drag to zoom, click again to zoom out
+                    Klikk å dra for å indikere en periode (zoom inn)
                 </small>
                 <div className="mt-2">
                     {isZoomed && (
@@ -306,7 +315,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                             onClick={resetZoom}
                             className="me-2"
                         >
-                            Reset Zoom
+                            Gjenopprett hele perioden
                         </Button>
                     )}
                 </div>
