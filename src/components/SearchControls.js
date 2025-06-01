@@ -190,9 +190,15 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             )}
                         </div>
                         <Button 
-                            variant="primary" 
+                            variant="outline-secondary" 
                             type="submit"
                             title="Search"
+                            style={{
+                                backgroundColor: 'white',
+                                border: '1px solid #ced4da',
+                                borderLeft: 'none',
+                                color: '#212529'
+                            }}
                         >
                             <FaSearch />
                         </Button>
@@ -207,7 +213,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 type="button"
                                 onClick={() => setShowCorpusDropdown(!showCorpusDropdown)}
                                 style={{ 
-                                    borderColor: '#ced4da'
+                                    border: 'none'
                                 }}
                             >
                                 {corpus}
@@ -243,7 +249,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             type="button"
                             onClick={() => setShowGraphTypeDropdown(!showGraphTypeDropdown)}
                             style={{ 
-                                borderColor: '#ced4da',
+                                border: 'none',
                                 position: 'relative',
                                 zIndex: 1001,
                                 minWidth: '120px'
@@ -287,17 +293,10 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                         <Button 
                             variant="outline-secondary"
                             size="sm"
-                            onClick={() => {
-                                if (!data?.series) return;
-                                const canvas = document.querySelector('canvas');
-                                const link = document.createElement('a');
-                                link.download = `ngram_graph_${new Date().toISOString().split('T')[0]}.png`;
-                                link.href = canvas.toDataURL('image/png');
-                                link.click();
-                            }}
+                            onClick={handleDownload}
                             style={{ 
-                                borderColor: '#ced4da',
-                                backgroundColor: 'white'
+                                border: 'none',
+                                backgroundColor: 'transparent'
                             }}
                         >
                             <FaDownload />
@@ -307,8 +306,8 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             size="sm"
                             onClick={() => setShowToolsModal(true)}
                             style={{ 
-                                borderColor: '#ced4da',
-                                backgroundColor: 'white'
+                                border: 'none',
+                                backgroundColor: 'transparent'
                             }}
                         >
                             <FaTools />

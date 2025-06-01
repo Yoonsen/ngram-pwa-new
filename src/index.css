@@ -32,6 +32,32 @@ code {
   border-color: #4a6fa5 !important;
 }
 
+.btn-outline-secondary {
+  transition: background-color 0.2s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: rgba(108, 117, 125, 0.25) !important;
+  border-color: #ced4da !important;
+  color: #212529 !important;
+}
+
+.dropdown-toggle.btn-outline-secondary:hover {
+  background-color: rgba(108, 117, 125, 0.25) !important;
+}
+
+.btn-outline-secondary:focus {
+  box-shadow: none !important;
+  border-color: #ced4da !important;
+  color: #212529 !important;
+}
+
+.btn-outline-secondary:active {
+  background-color: rgba(108, 117, 125, 0.25) !important;
+  border-color: #ced4da !important;
+  color: #212529 !important;
+}
+
 .search-controls {
   display: flex;
   flex-direction: row;
