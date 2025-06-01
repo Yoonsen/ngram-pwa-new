@@ -145,170 +145,176 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
 
     return (
         <div className="d-flex flex-column flex-md-row gap-3 align-items-start w-100">
-            <Form onSubmit={handleSubmit} className="d-flex align-items-center gap-3 flex-grow-1">
-                <InputGroup className="flex-grow-1">
-                    <Form.Control
-                        type="text"
-                        value={words}
-                        onChange={(e) => setWords(e.target.value)}
-                        placeholder="Enter words to search..."
-                        aria-label="Search words"
-                        style={{ borderRight: 'none' }}
-                    />
-                    <div className="dropdown">
-                        <button
-                            className="btn btn-outline-secondary dropdown-toggle"
-                            type="button"
-                            onClick={() => setShowLangDropdown(!showLangDropdown)}
-                            style={{ 
-                                borderLeft: 'none',
-                                borderRadius: '0',
-                                borderTop: '1px solid #ced4da',
-                                borderBottom: '1px solid #ced4da',
-                                borderRight: '1px solid #ced4da'
-                            }}
-                            disabled={corpus === 'avis'}
+            <div className="d-flex flex-column flex-md-row gap-3 align-items-start w-100">
+                <Form onSubmit={handleSubmit} className="d-flex align-items-center gap-3 flex-grow-1">
+                    <InputGroup className="flex-grow-1">
+                        <Form.Control
+                            type="text"
+                            value={words}
+                            onChange={(e) => setWords(e.target.value)}
+                            placeholder="Enter words to search..."
+                            aria-label="Search words"
+                            style={{ borderRight: 'none' }}
+                        />
+                        <div className="dropdown">
+                            <button
+                                className="btn btn-outline-secondary dropdown-toggle"
+                                type="button"
+                                onClick={() => setShowLangDropdown(!showLangDropdown)}
+                                style={{ 
+                                    borderLeft: 'none',
+                                    borderRadius: '0',
+                                    borderTop: '1px solid #ced4da',
+                                    borderBottom: '1px solid #ced4da',
+                                    borderRight: '1px solid #ced4da'
+                                }}
+                                disabled={corpus === 'avis'}
+                            >
+                                {corpus === 'avis' ? 'nor' : lang}
+                            </button>
+                            {showLangDropdown && corpus !== 'avis' && (
+                                <div className="dropdown-menu show">
+                                    {languages.map(language => (
+                                        <button
+                                            key={language.code}
+                                            className="dropdown-item"
+                                            onClick={() => {
+                                                setLang(language.code);
+                                                setShowLangDropdown(false);
+                                            }}
+                                        >
+                                            {language.code}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <Button 
+                            variant="primary" 
+                            type="submit"
+                            title="Search"
                         >
-                            {corpus === 'avis' ? 'nor' : lang}
-                        </button>
-                        {showLangDropdown && corpus !== 'avis' && (
-                            <div className="dropdown-menu show">
-                                {languages.map(language => (
+                            <FaSearch />
+                        </Button>
+                    </InputGroup>
+                </Form>
+
+                <div className="d-flex gap-2">
+                    <ButtonGroup>
+                        <div className="dropdown">
+                            <button
+                                className="btn btn-outline-secondary dropdown-toggle"
+                                type="button"
+                                onClick={() => setShowCorpusDropdown(!showCorpusDropdown)}
+                                style={{ 
+                                    borderColor: '#ced4da'
+                                }}
+                            >
+                                {corpus}
+                            </button>
+                            {showCorpusDropdown && (
+                                <div className="dropdown-menu show">
                                     <button
-                                        key={language.code}
                                         className="dropdown-item"
                                         onClick={() => {
-                                            setLang(language.code);
-                                            setShowLangDropdown(false);
+                                            setCorpus('bok');
+                                            setShowCorpusDropdown(false);
                                         }}
                                     >
-                                        {language.code}
+                                        bok
                                     </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    <Button 
-                        variant="primary" 
-                        type="submit"
-                        title="Search"
-                    >
-                        <FaSearch />
-                    </Button>
-                </InputGroup>
+                                    <button
+                                        className="dropdown-item"
+                                        onClick={() => {
+                                            setCorpus('avis');
+                                            setShowCorpusDropdown(false);
+                                        }}
+                                    >
+                                        avis
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </ButtonGroup>
 
-                <ButtonGroup>
                     <div className="dropdown">
                         <button
-                            className="btn btn-outline-secondary dropdown-toggle"
+                            className="btn btn-outline-secondary dropdown-toggle d-flex align-items-center"
                             type="button"
-                            onClick={() => setShowCorpusDropdown(!showCorpusDropdown)}
+                            onClick={() => setShowGraphTypeDropdown(!showGraphTypeDropdown)}
                             style={{ 
-                                borderColor: '#ced4da'
+                                borderColor: '#ced4da',
+                                position: 'relative',
+                                zIndex: 1001,
+                                minWidth: '120px'
                             }}
                         >
-                            {corpus}
+                            {graphType === 'relative' ? 'Relativ' :
+                             graphType === 'absolute' ? 'Absolutt' :
+                             graphType === 'cumulative' ? 'Kumulativ' :
+                             'Kohort'}
                         </button>
-                        {showCorpusDropdown && (
-                            <div className="dropdown-menu show">
-                                <button
-                                    className="dropdown-item"
-                                    onClick={() => {
-                                        setCorpus('bok');
-                                        setShowCorpusDropdown(false);
-                                    }}
-                                >
-                                    bok
-                                </button>
-                                <button
-                                    className="dropdown-item"
-                                    onClick={() => {
-                                        setCorpus('avis');
-                                        setShowCorpusDropdown(false);
-                                    }}
-                                >
-                                    avis
-                                </button>
+                        {showGraphTypeDropdown && (
+                            <div className="dropdown-menu show d-flex flex-column" style={{ 
+                                position: 'absolute',
+                                zIndex: 1000,
+                                top: '100%',
+                                left: 0,
+                                marginTop: '0.125rem',
+                                minWidth: '120px'
+                            }}>
+                                <button className="dropdown-item" onClick={() => {
+                                    handleGraphTypeSelect('relative');
+                                    setShowGraphTypeDropdown(false);
+                                }}>Relativ</button>
+                                <button className="dropdown-item" onClick={() => {
+                                    handleGraphTypeSelect('absolute');
+                                    setShowGraphTypeDropdown(false);
+                                }}>Absolutt</button>
+                                <button className="dropdown-item" onClick={() => {
+                                    handleGraphTypeSelect('cumulative');
+                                    setShowGraphTypeDropdown(false);
+                                }}>Kumulativ</button>
+                                <button className="dropdown-item" onClick={() => {
+                                    handleGraphTypeSelect('cohort');
+                                    setShowGraphTypeDropdown(false);
+                                }}>Kohort</button>
                             </div>
                         )}
                     </div>
-                </ButtonGroup>
 
-                <div className="dropdown">
-                    <button
-                        className="btn btn-outline-secondary dropdown-toggle"
-                        type="button"
-                        onClick={() => setShowGraphTypeDropdown(!showGraphTypeDropdown)}
-                        style={{ 
-                            borderColor: '#ced4da',
-                            position: 'relative',
-                            zIndex: 1001
-                        }}
-                    >
-                        {graphType === 'relative' ? 'Relativ' :
-                         graphType === 'absolute' ? 'Absolutt' :
-                         graphType === 'cumulative' ? 'Kumulativ' :
-                         'Kohort'}
-                    </button>
-                    {showGraphTypeDropdown && (
-                        <div className="dropdown-menu show" style={{ 
-                            position: 'absolute',
-                            zIndex: 1000,
-                            top: '100%',
-                            left: 0,
-                            marginTop: '0.125rem'
-                        }}>
-                            <button className="dropdown-item" onClick={() => {
-                                handleGraphTypeSelect('relative');
-                                setShowGraphTypeDropdown(false);
-                            }}>Relativ</button>
-                            <button className="dropdown-item" onClick={() => {
-                                handleGraphTypeSelect('absolute');
-                                setShowGraphTypeDropdown(false);
-                            }}>Absolutt</button>
-                            <button className="dropdown-item" onClick={() => {
-                                handleGraphTypeSelect('cumulative');
-                                setShowGraphTypeDropdown(false);
-                            }}>Kumulativ</button>
-                            <button className="dropdown-item" onClick={() => {
-                                handleGraphTypeSelect('cohort');
-                                setShowGraphTypeDropdown(false);
-                            }}>Kohort</button>
-                        </div>
-                    )}
+                    <div className="d-flex gap-2">
+                        <Button 
+                            variant="outline-secondary"
+                            size="sm"
+                            onClick={() => {
+                                if (!data?.series) return;
+                                const canvas = document.querySelector('canvas');
+                                const link = document.createElement('a');
+                                link.download = `ngram_graph_${new Date().toISOString().split('T')[0]}.png`;
+                                link.href = canvas.toDataURL('image/png');
+                                link.click();
+                            }}
+                            style={{ 
+                                borderColor: '#ced4da',
+                                backgroundColor: 'white'
+                            }}
+                        >
+                            <FaDownload />
+                        </Button>
+                        <Button 
+                            variant="outline-secondary"
+                            size="sm"
+                            onClick={() => setShowToolsModal(true)}
+                            style={{ 
+                                borderColor: '#ced4da',
+                                backgroundColor: 'white'
+                            }}
+                        >
+                            <FaTools />
+                        </Button>
+                    </div>
                 </div>
-            </Form>
-
-            <div className="d-flex gap-2">
-                <Button 
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => {
-                        if (!data?.series) return;
-                        const canvas = document.querySelector('canvas');
-                        const link = document.createElement('a');
-                        link.download = `ngram_graph_${new Date().toISOString().split('T')[0]}.png`;
-                        link.href = canvas.toDataURL('image/png');
-                        link.click();
-                    }}
-                    style={{ 
-                        borderColor: '#ced4da',
-                        backgroundColor: 'white'
-                    }}
-                >
-                    <FaDownload />
-                </Button>
-                <Button 
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={() => setShowToolsModal(true)}
-                    style={{ 
-                        borderColor: '#ced4da',
-                        backgroundColor: 'white'
-                    }}
-                >
-                    <FaTools />
-                </Button>
             </div>
 
             <Modal show={showModal} onHide={() => setShowModal(false)} centered>
