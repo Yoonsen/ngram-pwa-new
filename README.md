@@ -122,7 +122,7 @@ This approach demonstrates how AI tools can effectively bridge technical gaps, e
 
 - National Library of Norway's DH-Lab for the ngram API
 - Cursor AI for assistance in codebase conversion and development
-- Claude AI for pair programming support
+- ChatGPT AI for pair programming support
 - The open-source community for various tools and libraries
 
 ## License
