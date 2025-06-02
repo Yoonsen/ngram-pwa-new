@@ -92,7 +92,7 @@ const fetchNgramData = async (words, corpus, lang, graphType = 'relative', setti
             case_sens: settings?.capitalization ? '1' : '0',
             corpus: corpusMap[corpus],
             mode: modeMap[graphType],
-            smooth: '1',  // Set to 1 to turn off smoothing
+            smooth: '1',  // No API smoothing, we handle it in the chart
             from: MIN_YEAR.toString(),
             to: MAX_YEAR.toString()
         });
@@ -188,6 +188,23 @@ const fetchNgramData = async (words, corpus, lang, graphType = 'relative', setti
         });
 
         console.log('Processed Data:', JSON.stringify(processedData, null, 2));
+
+        // Apply smoothing if needed
+        if (settings?.smoothing > 1) {
+            processedData.series = processedData.series.map(series => {
+                const smoothedData = series.data.map((value, index) => {
+                    const start = Math.max(0, index - Math.floor(settings.smoothing / 2));
+                    const end = Math.min(series.data.length, index + Math.floor(settings.smoothing / 2) + 1);
+                    const window = series.data.slice(start, end);
+                    return window.reduce((a, b) => a + b, 0) / window.length;
+                });
+                return {
+                    name: series.name,
+                    data: smoothedData
+                };
+            });
+        }
+
         return processedData;
     } catch (error) {
         console.error('Error fetching ngram data:', error);

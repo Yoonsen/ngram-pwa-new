@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Form, Button, ButtonGroup, InputGroup, Modal, Dropdown, Container } from 'react-bootstrap';
 import { FaBook, FaNewspaper, FaChartLine, FaSearch, FaLanguage, FaTools, FaDownload } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
+import DownloadModal from './DownloadModal';
 
 const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange }) => {
     const [words, setWords] = useState('');
@@ -13,6 +14,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
     const [showCorpusDropdown, setShowCorpusDropdown] = useState(false);
     const [showGraphTypeDropdown, setShowGraphTypeDropdown] = useState(false);
     const [showToolsModal, setShowToolsModal] = useState(false);
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [capitalization, setCapitalization] = useState(false);
     const [smoothing, setSmoothing] = useState(4);
     const [lineThickness, setLineThickness] = useState(2);
@@ -24,6 +26,33 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
         lineThickness,
         lineTransparency
     });
+    const [searchTimeout, setSearchTimeout] = useState(null);
+
+    const debouncedSearch = useCallback((immediate = false) => {
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+
+        if (immediate) {
+            performSearch();
+            return;
+        }
+
+        const newTimeout = setTimeout(() => {
+            performSearch();
+        }, 1000); // Increased to 1 second
+
+        setSearchTimeout(newTimeout);
+    }, [searchTimeout]);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+        };
+    }, [searchTimeout]);
 
     const updateCapitalization = (newValue) => {
         setCapitalization(newValue);
@@ -59,16 +88,16 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
         onSearch(wordList, corpus, lang, graphType);
     };
 
-    // Trigger search when parameters change
+    // Only trigger search when corpus/lang/graphType changes if we have words
     useEffect(() => {
-        if (words) {
+        if (words.trim()) {
             performSearch();
         }
     }, [corpus, lang, graphType]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        performSearch();
+        performSearch(); // Immediate search on form submit
     };
 
     const handleGraphTypeSelect = (type) => {
@@ -155,7 +184,13 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                         <Form.Control
                             type="text"
                             value={words}
-                            onChange={(e) => setWords(e.target.value)}
+                            onChange={(e) => {
+                                setWords(e.target.value);
+                                // Only start debounced search if we have some text
+                                if (e.target.value.trim()) {
+                                    debouncedSearch();
+                                }
+                            }}
                             placeholder="Skriv ord skilt med komma"
                             aria-label="Search words"
                             style={{ borderRight: 'none' }}
@@ -299,7 +334,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                         <Button 
                             variant="outline-secondary"
                             size="sm"
-                            onClick={handleDownload}
+                            onClick={() => setShowDownloadModal(true)}
                             style={{ 
                                 border: 'none',
                                 backgroundColor: 'transparent'
@@ -373,21 +408,19 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                         lineThickness,
                                         lineTransparency
                                     });
-                                    if (words) {
-                                        onSearch(words.split(',').map(w => w.trim()).filter(w => w.length > 0), corpus, lang, graphType);
-                                    }
                                 }}
                             />
                         </div>
 
                         <div>
-                            <Form.Label>Linjetykkelse: {lineThickness}px</Form.Label>
+                            <Form.Label>Linjetykkelse: {lineThickness}</Form.Label>
                             <Form.Range
                                 min={1}
-                                max={10}
+                                max={5}
+                                step={0.5}
                                 value={lineThickness}
                                 onChange={(e) => {
-                                    const newValue = parseInt(e.target.value);
+                                    const newValue = parseFloat(e.target.value);
                                     setLineThickness(newValue);
                                     onSettingsChange?.({ 
                                         capitalization, 
@@ -400,13 +433,14 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                         </div>
 
                         <div>
-                            <Form.Label>Transparens: {Math.round(lineTransparency * 100)}%</Form.Label>
+                            <Form.Label>Gjennomsiktighet: {Math.round(lineTransparency * 100)}%</Form.Label>
                             <Form.Range
-                                min={0}
-                                max={100}
-                                value={lineTransparency * 100}
+                                min={0.1}
+                                max={1}
+                                step={0.1}
+                                value={lineTransparency}
                                 onChange={(e) => {
-                                    const newValue = parseInt(e.target.value) / 100;
+                                    const newValue = parseFloat(e.target.value);
                                     setLineTransparency(newValue);
                                     onSettingsChange?.({ 
                                         capitalization, 
@@ -417,76 +451,16 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 }}
                             />
                         </div>
-
-                        <hr />
-
-                        <Button
-                            variant="outline-primary"
-                            onClick={() => {
-                                if (!data?.series) return;
-                                // Create CSV content
-                                const headers = ['Year', ...data.series.map(s => s.name)];
-                                const rows = data.dates.map((year, i) => {
-                                    const values = data.series.map(s => s.data[i]);
-                                    return [year, ...values];
-                                });
-                                
-                                const csvContent = [
-                                    headers.join(','),
-                                    ...rows.map(row => row.join(','))
-                                ].join('\n');
-                                
-                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `ngram_data_${new Date().toISOString().split('T')[0]}.csv`;
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(url);
-                                setShowToolsModal(false);
-                            }}
-                        >
-                            Last ned som CSV
-                        </Button>
-                        <Button
-                            variant="outline-success"
-                            onClick={() => {
-                                if (!data?.series) return;
-                                // Create Excel workbook
-                                const wb = XLSX.utils.book_new();
-                                
-                                // Create worksheet data
-                                const wsData = [
-                                    ['Year', ...data.series.map(s => s.name)],
-                                    ...data.dates.map((year, i) => {
-                                        const values = data.series.map(s => s.data[i]);
-                                        return [year, ...values];
-                                    })
-                                ];
-                                
-                                const ws = XLSX.utils.aoa_to_sheet(wsData);
-                                
-                                // Add metadata
-                                ws['!cols'] = [
-                                    { wch: 10 }, // Year column width
-                                    ...data.series.map(() => ({ wch: 15 })) // Data columns width
-                                ];
-                                
-                                // Add worksheet to workbook
-                                XLSX.utils.book_append_sheet(wb, ws, 'Ngram Data');
-                                
-                                // Generate Excel file
-                                XLSX.writeFile(wb, `ngram_data_${new Date().toISOString().split('T')[0]}.xlsx`);
-                                setShowToolsModal(false);
-                            }}
-                        >
-                            Last ned som Excel
-                        </Button>
                     </div>
                 </Modal.Body>
             </Modal>
+
+            <DownloadModal
+                show={showDownloadModal}
+                onHide={() => setShowDownloadModal(false)}
+                onDownloadCsv={handleDownload}
+                onDownloadExcel={handleDownloadExcel}
+            />
         </div>
     );
 };
