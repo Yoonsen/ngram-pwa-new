@@ -86,8 +86,15 @@ const fetchNgramData = async (words, corpus, lang, graphType = 'relative', setti
             'cohort': 'absolutt'
         };
 
+        // Ensure words are properly formatted
+        const formattedWords = Array.isArray(words) ? words : [words];
+        const terms = formattedWords
+            .filter(word => word && word.trim().length > 0)
+            .map(word => word.trim())
+            .join(',');
+
         const params = new URLSearchParams({
-            terms: words.join(','),
+            terms: terms,
             lang: apiLang,
             case_sens: settings?.capitalization ? '1' : '0',
             corpus: corpusMap[corpus],

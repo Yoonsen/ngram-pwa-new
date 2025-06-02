@@ -27,6 +27,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
         lineTransparency
     });
     const [searchTimeout, setSearchTimeout] = useState(null);
+    const [lastSearchedWords, setLastSearchedWords] = useState('');
 
     const debouncedSearch = useCallback((immediate = false) => {
         if (searchTimeout) {
@@ -39,11 +40,14 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
         }
 
         const newTimeout = setTimeout(() => {
-            performSearch();
-        }, 1000); // Increased to 1 second
+            // Only perform search if we have a complete word (no typing in progress)
+            if (!words.endsWith(',')) {
+                performSearch();
+            }
+        }, 2000);
 
         setSearchTimeout(newTimeout);
-    }, [searchTimeout]);
+    }, [searchTimeout, words]);
 
     // Cleanup timeout on unmount
     useEffect(() => {
@@ -70,7 +74,14 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
     };
 
     const performSearch = () => {
-        const wordList = words.split(',')
+        // Don't search if we've already searched these exact words
+        if (words === lastSearchedWords) {
+            return;
+        }
+
+        // Split by comma and filter out empty strings
+        const wordList = words
+            .split(',')
             .map(w => w.trim())
             .filter(w => w.length > 0);
         
@@ -85,6 +96,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
             graphType
         });
         
+        setLastSearchedWords(words);
         onSearch(wordList, corpus, lang, graphType);
     };
 
@@ -185,10 +197,44 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             type="text"
                             value={words}
                             onChange={(e) => {
-                                setWords(e.target.value);
-                                // Only start debounced search if we have some text
-                                if (e.target.value.trim()) {
-                                    debouncedSearch();
+                                const newValue = e.target.value;
+                                setWords(newValue);
+                                
+                                // Clear any pending debounced searches
+                                if (searchTimeout) {
+                                    clearTimeout(searchTimeout);
+                                    setSearchTimeout(null);
+                                }
+
+                                // Only trigger search in specific cases:
+                                // 1. When a comma is typed (immediate search)
+                                // 2. When typing normally (debounced search)
+                                if (newValue.endsWith(',')) {
+                                    // If we just typed a comma, search immediately
+                                    const lastWord = newValue.split(',').slice(-2, -1)[0];
+                                    if (lastWord && lastWord.trim()) {
+                                        performSearch();
+                                    }
+                                } else if (newValue.trim() && !newValue.endsWith(',')) {
+                                    // Only set up debounced search if this is a new word
+                                    const words = newValue.split(',').map(w => w.trim());
+                                    const lastWord = words[words.length - 1];
+                                    if (lastWord && lastWord.length > 1) { // Only search if word is longer than 1 char
+                                        const newTimeout = setTimeout(() => {
+                                            performSearch();
+                                        }, 2000);
+                                        setSearchTimeout(newTimeout);
+                                    }
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    if (searchTimeout) {
+                                        clearTimeout(searchTimeout);
+                                        setSearchTimeout(null);
+                                    }
+                                    performSearch();
                                 }
                             }}
                             placeholder="Skriv ord skilt med komma"
