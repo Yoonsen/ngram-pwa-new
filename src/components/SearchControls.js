@@ -302,7 +302,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             onClick={handleDownload}
                             style={{ 
                                 border: 'none',
-                                backgroundColor: 'transparent'
+                                backgroundColor: 'white'
                             }}
                         >
                             <FaDownload />
@@ -313,7 +313,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             onClick={() => setShowToolsModal(true)}
                             style={{ 
                                 border: 'none',
-                                backgroundColor: 'transparent'
+                                backgroundColor: 'white'
                             }}
                         >
                             <FaTools />
