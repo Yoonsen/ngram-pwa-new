@@ -86,4 +86,52 @@ code {
   .search-controls .btn {
     flex: 1;
   }
+}
+
+/* Remove borders from all buttons and dropdowns */
+.btn,
+.btn-outline-secondary,
+.dropdown-toggle,
+.btn-primary,
+.btn-outline-primary {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Make input group appear as one unified field */
+.input-group .form-control {
+  border: 1px solid #ced4da !important;
+  border-right: none !important;
+}
+
+.input-group .btn-outline-secondary {
+  border: 1px solid #ced4da !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.input-group .btn-primary {
+  border: 1px solid #ced4da !important;
+  border-left: none !important;
+}
+
+.input-group .form-control:focus,
+.input-group .btn:focus {
+  box-shadow: none !important;
+  border-color: #ced4da !important;
+}
+
+/* Remove border from dropdown menu */
+.dropdown-menu {
+  border: 1px solid #ced4da !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Remove border from dropdown items */
+.dropdown-item {
+  border: none !important;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa !important;
 } 
