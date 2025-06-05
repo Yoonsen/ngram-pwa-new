@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button, ButtonGroup, InputGroup, Modal, Dropdown, Container } from 'react-bootstrap';
 import { FaBook, FaNewspaper, FaChartLine, FaSearch, FaLanguage, FaTools, FaDownload } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
+import { MIN_YEAR, MAX_YEAR } from '../services/ngramProcessor';
 
 const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange }) => {
     const [words, setWords] = useState('');
@@ -23,7 +24,9 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
         capitalization,
         smoothing,
         lineThickness,
-        lineTransparency
+        lineTransparency,
+        zoomStart: MIN_YEAR,
+        zoomEnd: MAX_YEAR
     });
 
     const updateCapitalization = (newValue) => {
@@ -471,7 +474,51 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                         capitalization, 
                                         smoothing,
                                         lineThickness,
-                                        lineTransparency: newValue
+                                        lineTransparency: newValue,
+                                        zoomStart: settings.zoomStart,
+                                        zoomEnd: settings.zoomEnd
+                                    });
+                                }}
+                            />
+                        </div>
+
+                        <div>
+                            <Form.Label>Zoom startår: {settings.zoomStart}</Form.Label>
+                            <Form.Range
+                                min={MIN_YEAR}
+                                max={MAX_YEAR}
+                                value={settings.zoomStart}
+                                onChange={(e) => {
+                                    const newValue = parseInt(e.target.value);
+                                    setSettings(prev => ({ ...prev, zoomStart: newValue }));
+                                    onSettingsChange?.({ 
+                                        capitalization, 
+                                        smoothing,
+                                        lineThickness,
+                                        lineTransparency,
+                                        zoomStart: newValue,
+                                        zoomEnd: settings.zoomEnd
+                                    });
+                                }}
+                            />
+                        </div>
+
+                        <div>
+                            <Form.Label>Zoom sluttår: {settings.zoomEnd}</Form.Label>
+                            <Form.Range
+                                min={MIN_YEAR}
+                                max={MAX_YEAR}
+                                value={settings.zoomEnd}
+                                onChange={(e) => {
+                                    const newValue = parseInt(e.target.value);
+                                    setSettings(prev => ({ ...prev, zoomEnd: newValue }));
+                                    onSettingsChange?.({ 
+                                        capitalization, 
+                                        smoothing,
+                                        lineThickness,
+                                        lineTransparency,
+                                        zoomStart: settings.zoomStart,
+                                        zoomEnd: newValue
                                     });
                                 }}
                             />

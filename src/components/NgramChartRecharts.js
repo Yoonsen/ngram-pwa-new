@@ -9,7 +9,12 @@ import { FaUndo } from 'react-icons/fa';
 // Register Chart.js components and zoom plugin
 Chart.register(...registerables, zoomPlugin);
 
-const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capitalization: false, smoothing: 4 }, corpus: corpusType }) => {
+const NgramChartRecharts = ({ data, graphType = 'relative', settings = { 
+    capitalization: false, 
+    smoothing: 4,
+    zoomStart: MIN_YEAR,
+    zoomEnd: MAX_YEAR
+}, corpus: corpusType }) => {
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     const [isZoomed, setIsZoomed] = useState(false);
@@ -207,91 +212,45 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false,
+                animation: false, // Disable animations for better performance
                 interaction: {
-                    mode: 'nearest',
-                    intersect: true,
-                    axis: 'xy'
-                },
-                onClick: handleChartClick,
-                onHover: (event, elements) => {
-                    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                    mode: 'index',
+                    intersect: false,
                 },
                 plugins: {
-                    legend: {
-                        position: isNarrow ? 'bottom' : 'right',
-                        align: isNarrow ? 'center' : 'start',
-                        labels: {
-                            boxWidth: 12,
-                            boxHeight: 12,
-                            padding: 10,
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            font: {
-                                size: 12,
-                                family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
-                            }
-                        }
-                    },
-                    tooltip: {
-                        enabled: true,
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        titleColor: '#000',
-                        bodyColor: '#000',
-                        borderColor: '#ccc',
-                        borderWidth: 1,
-                        padding: 10,
-                        callbacks: {
-                            label: function(context) {
-                                const value = context.raw;
-                                
-                                if (graphType === 'cohort') {
-                                    return `${context.dataset.label}: ${(value * 100).toFixed(2)}%`;
-                                } else if (graphType === 'cumulative') {
-                                    return `${context.dataset.label}: ${Math.round(value).toLocaleString()}`;
-                                } else if (graphType === 'absolute') {
-                                    return `${context.dataset.label}: ${Math.round(value).toLocaleString()}`;
-                                } else if (graphType === 'relative') {
-                                    // Format relative values with up to 4 decimal places, removing trailing zeros
-                                    const formatted = value.toFixed(4).replace(/\.?0+$/, '');
-                                    return `${context.dataset.label}: ${formatted}%`;
-                                }
-                                return `${context.dataset.label}: ${value}`;
-                            }
-                        }
-                    },
                     zoom: {
                         pan: {
                             enabled: true,
                             mode: 'x',
-                            modifierKey: 'shift',
-                            threshold: 10,
+                            modifierKey: 'ctrl',
                             onPan: () => {
                                 setIsZoomed(true);
+                                if (chartInstance.current) {
+                                    const chart = chartInstance.current;
+                                    const start = Math.max(MIN_YEAR, chart.scales.x.min);
+                                    const end = Math.min(MAX_YEAR, chart.scales.x.max);
+                                    setZoomStart(Math.round(start));
+                                    setZoomEnd(Math.round(end));
+                                    setCurrentZoomState({ start, end });
+                                    chart.update('none'); // Update without animation
+                                }
                             }
                         },
                         zoom: {
-                            mode: 'x',
-                            drag: {
+                            wheel: {
                                 enabled: true,
-                                backgroundColor: 'rgba(0,0,0,0.1)',
-                                borderColor: 'rgba(0,0,0,0.3)',
-                                borderWidth: 1,
-                                threshold: 10
+                                modifierKey: 'ctrl',
                             },
                             pinch: {
                                 enabled: true
                             },
-                            wheel: {
-                                enabled: false
+                            drag: {
+                                enabled: true,
+                                backgroundColor: 'rgba(0,0,0,0.1)',
+                                borderColor: 'rgba(0,0,0,0.3)',
+                                borderWidth: 1
                             },
-                            limits: {
-                                x: {
-                                    min: MIN_YEAR,
-                                    max: MAX_YEAR,
-                                    minRange: 5
-                                }
-                            },
+                            mode: 'x',
                             onZoom: ({chart}) => {
                                 setIsZoomed(true);
                                 const start = Math.max(MIN_YEAR, chart.scales.x.min);
@@ -299,6 +258,44 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 setZoomStart(Math.round(start));
                                 setZoomEnd(Math.round(end));
                                 setCurrentZoomState({ start, end });
+                                chart.update('none'); // Update without animation
+                            }
+                        },
+                        limits: {
+                            x: {
+                                min: settings.zoomStart,
+                                max: settings.zoomEnd,
+                                minRange: 5
+                            }
+                        }
+                    },
+                    legend: {
+                        position: isNarrow ? 'bottom' : 'right',
+                        align: 'start',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += new Intl.NumberFormat('no-NO').format(context.parsed.y);
+                                }
+                                return label;
                             }
                         }
                     }
@@ -306,42 +303,26 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 scales: {
                     x: {
                         type: 'linear',
-                        title: {
-                            display: true,
-                            text: 'Year'
-                        },
+                        position: 'bottom',
+                        min: currentZoomState ? Math.floor(currentZoomState.start) : settings.zoomStart,
+                        max: currentZoomState ? Math.ceil(currentZoomState.end) : settings.zoomEnd,
                         ticks: {
-                            maxTicksLimit: 10,
                             callback: function(value) {
-                                return Math.round(value).toString().replace(/\s/g, '');
-                            }
-                        },
-                        min: Math.max(MIN_YEAR, currentZoomState ? currentZoomState.start : MIN_YEAR),
-                        max: Math.min(MAX_YEAR, currentZoomState ? currentZoomState.end : MAX_YEAR),
-                        bounds: 'ticks'
+                                return Math.round(value);
+                            },
+                            stepSize: 1
+                        }
                     },
                     y: {
-                        title: {
-                            display: true,
-                            text: graphType === 'relative' ? 'Relativ frekvens i prosent' :
-                                  graphType === 'absolute' ? 'Antall forekomster totalt' :
-                                  graphType === 'cumulative' ? 'Kumulativt antall' :
-                                  'Kohort'
-                        },
-                        display: true,
                         beginAtZero: true,
                         ticks: {
-                            display: !isNarrow,  // Hide ticks when container is narrow
                             callback: function(value) {
-                                if (graphType === 'relative') {
-                                    const formatted = value.toFixed(4).replace(/\.?0+$/, '');
-                                    return formatted + '%';
-                                }
-                                return value.toLocaleString('nb-NO');
+                                return new Intl.NumberFormat('no-NO').format(value);
                             }
                         }
                     }
-                }
+                },
+                onClick: handleChartClick
             }
         });
 
@@ -350,7 +331,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 chartInstance.current.destroy();
             }
         };
-    }, [data, graphType, currentZoomState, settings.smoothing, settings.lineThickness, settings.lineTransparency, isNarrow]);
+    }, [data, graphType, currentZoomState, settings.smoothing, settings.lineThickness, settings.lineTransparency, isNarrow, settings.zoomStart, settings.zoomEnd]);
 
     return (
         <div className="d-flex flex-column flex-lg-row gap-3">
