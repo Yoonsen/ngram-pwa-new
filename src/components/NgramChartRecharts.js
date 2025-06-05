@@ -18,6 +18,27 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
     const [showSearchModal, setShowSearchModal] = useState(false);
     const [selectedYear, setSelectedYear] = useState(null);
     const [selectedWord, setSelectedWord] = useState(null);
+    const [isNarrow, setIsNarrow] = useState(false);
+
+    // Add resize observer to detect container width
+    useEffect(() => {
+        const resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                const width = entry.contentRect.width;
+                setIsNarrow(width < 576); // Bootstrap's sm breakpoint
+            }
+        });
+
+        if (chartRef.current) {
+            resizeObserver.observe(chartRef.current.parentElement);
+        }
+
+        return () => {
+            if (chartRef.current) {
+                resizeObserver.unobserve(chartRef.current.parentElement);
+            }
+        };
+    }, []);
 
     const handleChartClick = (event) => {
         const chart = chartInstance.current;
@@ -180,6 +201,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: false,
                 interaction: {
                     mode: 'nearest',
                     intersect: true,
@@ -191,11 +213,27 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 },
                 plugins: {
                     legend: {
-                        position: 'top',
+                        position: 'bottom',
+                        align: 'center',
                         labels: {
+                            boxWidth: 12,
+                            boxHeight: 12,
+                            padding: 10,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
                             font: {
-                                size: 12
+                                size: 12,
+                                family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
                             }
+                        },
+                        onClick: function(e, legendItem, legend) {
+                            const index = legendItem.datasetIndex;
+                            const chart = legend.chart;
+                            const meta = chart.getDatasetMeta(index);
+                            
+                            // Toggle the dataset visibility
+                            meta.hidden = !meta.hidden;
+                            chart.update();
                         }
                     },
                     tooltip: {
@@ -217,7 +255,9 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 } else if (graphType === 'absolute') {
                                     return `${context.dataset.label}: ${Math.round(value).toLocaleString()}`;
                                 } else if (graphType === 'relative') {
-                                    return `${context.dataset.label}: ${value.toFixed(4)}%`;
+                                    // Format relative values with up to 4 decimal places, removing trailing zeros
+                                    const formatted = value.toFixed(4).replace(/\.?0+$/, '');
+                                    return `${context.dataset.label}: ${formatted}%`;
                                 }
                                 return `${context.dataset.label}: ${value}`;
                             }
@@ -291,16 +331,16 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                   graphType === 'cumulative' ? 'Kumulativt antall' :
                                   'Kohort'
                         },
+                        display: true,
+                        beginAtZero: true,
                         ticks: {
+                            display: !isNarrow,  // Hide ticks when container is narrow
                             callback: function(value) {
-                                if (graphType === 'absolute' || graphType === 'cumulative') {
-                                    return Math.round(value).toLocaleString();
-                                } else if (graphType === 'relative') {
-                                    return value.toFixed(4) + '%';
-                                } else if (graphType === 'cohort') {
-                                    return (value * 100).toFixed(2) + '%';
+                                if (graphType === 'relative') {
+                                    const formatted = value.toFixed(4).replace(/\.?0+$/, '');
+                                    return formatted + '%';
                                 }
-                                return value;
+                                return value.toLocaleString('nb-NO');
                             }
                         }
                     }
@@ -313,7 +353,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 chartInstance.current.destroy();
             }
         };
-    }, [data, graphType, currentZoomState, settings.smoothing, settings.lineThickness, settings.lineTransparency]);
+    }, [data, graphType, currentZoomState, settings.smoothing, settings.lineThickness, settings.lineTransparency, isNarrow]);
 
     return (
         <Container fluid className="p-0">

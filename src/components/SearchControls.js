@@ -184,7 +184,11 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                             onChange={(e) => setWords(e.target.value)}
                             placeholder="Skriv ord skilt med komma"
                             aria-label="Search words"
-                            style={{ borderRight: 'none' }}
+                            style={{ 
+                                borderRight: 'none',
+                                minWidth: '200px',
+                                flex: '1 1 auto'
+                            }}
                         />
                         <div className="dropdown">
                             <button
@@ -287,10 +291,11 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 minWidth: '120px'
                             }}
                             >
-                            {graphType === 'relative' ? 'Relativ' :
-                             graphType === 'absolute' ? 'Absolutt' :
-                             graphType === 'cumulative' ? 'Kumulativ' :
-                             'Kohort'}
+                            {graphType === 'relative' ? 'relativ' :
+                             graphType === 'absolute' ? 'absolutt' :
+                             graphType === 'cumulative' ? 'kumulativ' :
+                             graphType === 'cohort' ? 'kohort' :
+                             'kohort'}
                         </button>
                         {showGraphTypeDropdown && (
                             <div className="dropdown-menu show d-flex flex-column" style={{ 
@@ -304,19 +309,19 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 <button className="dropdown-item" onClick={() => {
                                     handleGraphTypeSelect('relative');
                                     setShowGraphTypeDropdown(false);
-                                }}>Relativ</button>
+                                }}>relativ</button>
                                 <button className="dropdown-item" onClick={() => {
                                     handleGraphTypeSelect('absolute');
                                     setShowGraphTypeDropdown(false);
-                                }}>Absolutt</button>
+                                }}>absolutt</button>
                                 <button className="dropdown-item" onClick={() => {
                                     handleGraphTypeSelect('cumulative');
                                     setShowGraphTypeDropdown(false);
-                                }}>Kumulativ</button>
+                                }}>kumulativ</button>
                                 <button className="dropdown-item" onClick={() => {
                                     handleGraphTypeSelect('cohort');
                                     setShowGraphTypeDropdown(false);
-                                }}>Kohort</button>
+                                }}>kohort</button>
                             </div>
                         )}
                     </div>
