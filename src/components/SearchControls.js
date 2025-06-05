@@ -13,6 +13,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
     const [showCorpusDropdown, setShowCorpusDropdown] = useState(false);
     const [showGraphTypeDropdown, setShowGraphTypeDropdown] = useState(false);
     const [showToolsModal, setShowToolsModal] = useState(false);
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [capitalization, setCapitalization] = useState(false);
     const [smoothing, setSmoothing] = useState(4);
     const [lineThickness, setLineThickness] = useState(2);
@@ -113,6 +114,33 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
         link.download = `ngram_graph_${new Date().toISOString().split('T')[0]}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
+        setShowDownloadModal(false);
+    };
+
+    const handleDownloadCSV = () => {
+        if (!data?.series) return;
+        // Create CSV content
+        const headers = ['Year', ...data.series.map(s => s.name)];
+        const rows = data.dates.map((year, i) => {
+            const values = data.series.map(s => s.data[i]);
+            return [year, ...values];
+        });
+        
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.join(','))
+        ].join('\n');
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ngram_data_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setShowDownloadModal(false);
     };
 
     const handleDownloadExcel = () => {
@@ -121,15 +149,12 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
         const wb = XLSX.utils.book_new();
         
         // Create worksheet data
-        const headers = ['Year', ...data.series.map(s => s.name)];
-        const rows = data.dates.map((year, i) => {
-            const values = data.series.map(s => s.data[i]);
-            return [year, ...values];
-        });
-        
         const wsData = [
-            headers,
-            ...rows
+            ['Year', ...data.series.map(s => s.name)],
+            ...data.dates.map((year, i) => {
+                const values = data.series.map(s => s.data[i]);
+                return [year, ...values];
+            })
         ];
         
         const ws = XLSX.utils.aoa_to_sheet(wsData);
@@ -145,6 +170,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
         
         // Generate Excel file
         XLSX.writeFile(wb, `ngram_data_${new Date().toISOString().split('T')[0]}.xlsx`);
+        setShowDownloadModal(false);
     };
 
     return (
@@ -299,7 +325,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                         <Button 
                             variant="outline-secondary"
                             size="sm"
-                            onClick={handleDownload}
+                            onClick={() => setShowDownloadModal(true)}
                             style={{ 
                                 border: 'none',
                                 backgroundColor: 'white'
@@ -338,6 +364,34 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 {type.label}
                             </Button>
                         ))}
+                    </div>
+                </Modal.Body>
+            </Modal>
+
+            <Modal show={showDownloadModal} onHide={() => setShowDownloadModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Last ned data</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <div className="d-grid gap-3">
+                        <Button
+                            variant="outline-primary"
+                            onClick={handleDownload}
+                        >
+                            Last ned som bilde
+                        </Button>
+                        <Button
+                            variant="outline-primary"
+                            onClick={handleDownloadCSV}
+                        >
+                            Last ned som CSV
+                        </Button>
+                        <Button
+                            variant="outline-success"
+                            onClick={handleDownloadExcel}
+                        >
+                            Last ned som Excel
+                        </Button>
                     </div>
                 </Modal.Body>
             </Modal>
@@ -417,73 +471,6 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 }}
                             />
                         </div>
-
-                        <hr />
-
-                        <Button
-                            variant="outline-primary"
-                            onClick={() => {
-                                if (!data?.series) return;
-                                // Create CSV content
-                                const headers = ['Year', ...data.series.map(s => s.name)];
-                                const rows = data.dates.map((year, i) => {
-                                    const values = data.series.map(s => s.data[i]);
-                                    return [year, ...values];
-                                });
-                                
-                                const csvContent = [
-                                    headers.join(','),
-                                    ...rows.map(row => row.join(','))
-                                ].join('\n');
-                                
-                                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = `ngram_data_${new Date().toISOString().split('T')[0]}.csv`;
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(url);
-                                setShowToolsModal(false);
-                            }}
-                        >
-                            Last ned som CSV
-                        </Button>
-                        <Button
-                            variant="outline-success"
-                            onClick={() => {
-                                if (!data?.series) return;
-                                // Create Excel workbook
-                                const wb = XLSX.utils.book_new();
-                                
-                                // Create worksheet data
-                                const wsData = [
-                                    ['Year', ...data.series.map(s => s.name)],
-                                    ...data.dates.map((year, i) => {
-                                        const values = data.series.map(s => s.data[i]);
-                                        return [year, ...values];
-                                    })
-                                ];
-                                
-                                const ws = XLSX.utils.aoa_to_sheet(wsData);
-                                
-                                // Add metadata
-                                ws['!cols'] = [
-                                    { wch: 10 }, // Year column width
-                                    ...data.series.map(() => ({ wch: 15 })) // Data columns width
-                                ];
-                                
-                                // Add worksheet to workbook
-                                XLSX.utils.book_append_sheet(wb, ws, 'Ngram Data');
-                                
-                                // Generate Excel file
-                                XLSX.writeFile(wb, `ngram_data_${new Date().toISOString().split('T')[0]}.xlsx`);
-                                setShowToolsModal(false);
-                            }}
-                        >
-                            Last ned som Excel
-                        </Button>
                     </div>
                 </Modal.Body>
             </Modal>
