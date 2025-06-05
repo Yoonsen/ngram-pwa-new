@@ -25,7 +25,7 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
         const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
                 const width = entry.contentRect.width;
-                setIsNarrow(width < 576); // Bootstrap's sm breakpoint
+                setIsNarrow(width < 992); // Bootstrap's lg breakpoint
             }
         });
 
@@ -213,8 +213,8 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                 },
                 plugins: {
                     legend: {
-                        position: 'bottom',
-                        align: 'center',
+                        position: isNarrow ? 'bottom' : 'right',
+                        align: isNarrow ? 'center' : 'start',
                         labels: {
                             boxWidth: 12,
                             boxHeight: 12,
@@ -225,15 +225,6 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
                                 size: 12,
                                 family: "'Helvetica Neue', 'Helvetica', 'Arial', sans-serif"
                             }
-                        },
-                        onClick: function(e, legendItem, legend) {
-                            const index = legendItem.datasetIndex;
-                            const chart = legend.chart;
-                            const meta = chart.getDatasetMeta(index);
-                            
-                            // Toggle the dataset visibility
-                            meta.hidden = !meta.hidden;
-                            chart.update();
                         }
                     },
                     tooltip: {
@@ -356,56 +347,50 @@ const NgramChartRecharts = ({ data, graphType = 'relative', settings = { capital
     }, [data, graphType, currentZoomState, settings.smoothing, settings.lineThickness, settings.lineTransparency, isNarrow]);
 
     return (
-        <Container fluid className="p-0">
-            <div style={{ 
-                width: '100%', 
-                height: 400,
-                position: 'relative'
-            }}>
-                <canvas 
-                    ref={chartRef} 
-                    style={{
-                        touchAction: 'none',
-                        userSelect: 'none'
-                    }}
-                />
-            </div>
-            <div className="text-center mt-2">
-                <small className="text-muted">
-                    Klikk å dra for å indikere en periode (zoom inn)
-                </small>
-                <div className="mt-2">
+        <div className="d-flex flex-column flex-lg-row gap-3">
+            <div className="flex-grow-1">
+                <div style={{ minHeight: '400px', position: 'relative' }}>
+                    <canvas ref={chartRef} style={{ touchAction: 'none', userSelect: 'none' }}></canvas>
+                </div>
+                <div className="text-center mt-2">
+                    <small className="text-muted">
+                        Klikk å dra for å indikere en periode (zoom inn)
+                    </small>
+                    <div className="mt-2">
                         <Button 
                             variant="outline-secondary" 
                             size="sm"
                             onClick={resetZoom}
                             className="me-2"
                         >
-                        Gjenopprett hele perioden
-                    </Button>
+                            Gjenopprett hele perioden
+                        </Button>
+                    </div>
                 </div>
             </div>
-
+            <div className="d-flex flex-column justify-content-center">
+                <div className="chart-legend"></div>
+            </div>
             <Modal show={showSearchModal} onHide={() => setShowSearchModal(false)} centered>
                 <Modal.Header closeButton>
                     <Modal.Title>Søk i Nasjonalbiblioteket</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>Søk etter "{selectedWord}" i {corpusType === 'avis' ? 'aviser' : 'bøker'}:</p>
-                    <div className="d-grid gap-2">
+                    <p>Velg tidsperiode for søk i Nasjonalbiblioteket:</p>
+                    <div className="d-flex gap-2">
                         <Button variant="outline-primary" onClick={() => openSearch('exact')}>
-                            Søk i {selectedYear}
+                            Nøyaktig år
                         </Button>
                         <Button variant="outline-primary" onClick={() => openSearch('range')}>
-                            Søk i perioden {selectedYear - 5} - {selectedYear + 5}
+                            ±5 år
                         </Button>
                         <Button variant="outline-primary" onClick={() => openSearch('open')}>
-                            Åpen søk
+                            Hele perioden
                         </Button>
-                </div>
+                    </div>
                 </Modal.Body>
             </Modal>
-        </Container>
+        </div>
     );
 };
 
