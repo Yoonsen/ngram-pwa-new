@@ -114,15 +114,23 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
 
     const handleGraphTypeSelect = (type) => {
         setGraphType(type);
-        onGraphTypeChange(type);
-        setShowModal(false);
+        onGraphTypeChange?.(type);
+        setShowGraphTypeDropdown(false);
     };
 
+    // Add effect to ensure graph type is valid
+    useEffect(() => {
+        const validTypes = ['relative', 'absolute', 'cumulative', 'cohort'];
+        if (!validTypes.includes(graphType)) {
+            handleGraphTypeSelect('relative');
+        }
+    }, [graphType]);
+
     const graphTypes = [
-        { id: 'relative', label: 'Relative Frequency' },
-        { id: 'absolute', label: 'Absolute Frequency' },
-        { id: 'cumulative', label: 'Cumulative Frequency' },
-        { id: 'cohort', label: 'Cohort Analysis' }
+        { id: 'relative', label: 'Relativ' },
+        { id: 'absolute', label: 'Absolutt' },
+        { id: 'cumulative', label: 'Kumulativ' },
+        { id: 'cohort', label: 'Kohort' }
     ];
 
     const getCorpusLabel = (corpus) => corpus === 'bok' ? 'Books' : 'Newspapers';
@@ -341,7 +349,7 @@ const SearchControls = ({ onSearch, onGraphTypeChange, data, onSettingsChange })
                                 zIndex: 1001,
                                 minWidth: '120px'
                             }}
-                            >
+                        >
                             {graphType === 'relative' ? 'Relativ' :
                              graphType === 'absolute' ? 'Absolutt' :
                              graphType === 'cumulative' ? 'Kumulativ' :

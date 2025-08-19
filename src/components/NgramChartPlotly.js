@@ -5,10 +5,25 @@ import DownloadModal from './DownloadModal';
 
 const START_YEAR = 1810;
 
-const NgramChartPlotly = ({ data, corpus = 'avis', onDownloadCsv, onDownloadExcel, settings }) => {
+const NgramChartPlotly = ({ data, corpus = 'avis', onDownloadCsv, onDownloadExcel, settings, graphType = 'relative' }) => {
     const [modalData, setModalData] = useState(null);
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [viewRange, setViewRange] = useState(null);
+    const [containerWidth, setContainerWidth] = useState(null);
+
+    // Add resize handler
+    useEffect(() => {
+        const handleResize = () => {
+            const container = document.querySelector('.chart-container');
+            if (container) {
+                setContainerWidth(container.offsetWidth);
+            }
+        };
+
+        handleResize(); // Initial size
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Apply smoothing to data
     const smoothData = useCallback((data, smoothing) => {
@@ -52,26 +67,58 @@ const NgramChartPlotly = ({ data, corpus = 'avis', onDownloadCsv, onDownloadExce
         return <div>No data available</div>;
     }
 
-    const plotData = data.series.map((series, i) => ({
-        x: data.dates,
-        y: smoothData(series.data, settings?.smoothing),
-        name: series.name,
-        type: 'scatter',
-        mode: 'lines',
-        showlegend: true,
-        hoverinfo: 'x+y+name',
-        line: {
-            shape: 'spline',
-            width: settings?.lineThickness || 2,
-            color: `hsla(${(i * 360) / data.series.length}, 70%, 50%, ${1 - (settings?.lineTransparency || 0)})`
+    const plotData = data.series.map((series, i) => {
+        const baseConfig = {
+            x: data.dates,
+            y: smoothData(series.data, settings?.smoothing),
+            name: series.name,
+            type: 'scatter',
+            mode: 'lines',
+            showlegend: true,
+            hoverinfo: 'x+y+name',
+            line: {
+                shape: 'spline',
+                width: settings?.lineThickness || 2,
+                color: `hsla(${(i * 360) / data.series.length}, 70%, 50%, ${1 - (settings?.lineTransparency || 0)})`
+            }
+        };
+
+        switch (graphType) {
+            case 'absolute':
+                return {
+                    ...baseConfig,
+                    y: series.data.map(val => val * 100) // Convert to percentage
+                };
+            case 'cumulative':
+                return {
+                    ...baseConfig,
+                    y: series.data.reduce((acc, val) => {
+                        acc.push((acc.length ? acc[acc.length - 1] : 0) + val);
+                        return acc;
+                    }, [])
+                };
+            case 'cohort':
+                return {
+                    ...baseConfig,
+                    fill: 'tonexty'
+                };
+            case 'relative':
+            default:
+                return baseConfig;
         }
-    }));
+    });
 
     const layout = {
         title: 'Ngram Frequency',
-        width: 900,
-        height: 500,
-        margin: { t: 30, r: 20, b: 40, l: 60 },
+        autosize: true,
+        height: Math.min(500, window.innerHeight - 200),
+        margin: { 
+            t: 30,
+            r: 20, 
+            b: 40, 
+            l: 60,
+            pad: 5
+        },
         xaxis: { 
             title: 'Year',
             fixedrange: false,
@@ -80,11 +127,11 @@ const NgramChartPlotly = ({ data, corpus = 'avis', onDownloadCsv, onDownloadExce
             constrain: 'domain',
             constraintoward: 'center',
             rangemode: 'normal',
-            dtick: 10,
+            dtick: window.innerWidth < 600 ? 20 : 10,
             tick0: START_YEAR
         },
         yaxis: { 
-            title: 'Frequency',
+            title: graphType === 'absolute' ? 'Percentage' : 'Frequency',
             fixedrange: true,
             rangemode: 'nonnegative',
             autorange: true
@@ -92,10 +139,14 @@ const NgramChartPlotly = ({ data, corpus = 'avis', onDownloadCsv, onDownloadExce
         dragmode: 'pan',
         showlegend: true,
         legend: {
-            x: 1,
-            xanchor: 'right',
-            y: 1
-        }
+            x: window.innerWidth < 600 ? 0.5 : 1,
+            xanchor: window.innerWidth < 600 ? 'center' : 'right',
+            y: window.innerWidth < 600 ? -0.2 : 1,
+            yanchor: window.innerWidth < 600 ? 'top' : 'auto',
+            orientation: window.innerWidth < 600 ? 'horizontal' : 'vertical',
+            traceorder: graphType === 'cohort' ? 'reversed' : 'normal'
+        },
+        hovermode: 'closest'
     };
 
     const config = {
@@ -145,11 +196,15 @@ const NgramChartPlotly = ({ data, corpus = 'avis', onDownloadCsv, onDownloadExce
 
     return (
         <>
-            <div style={{ position: 'relative' }}>
+            <div className="chart-container" style={{ position: 'relative', width: '100%', minHeight: '300px' }}>
                 <Plot
                     data={plotData}
                     layout={layout}
-                    config={config}
+                    config={{
+                        ...config,
+                        responsive: true,
+                        useResizeHandler: true
+                    }}
                     onClick={handleClick}
                     onUpdate={handleUpdate}
                     style={{ width: '100%', height: '100%' }}
